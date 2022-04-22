@@ -1,0 +1,8 @@
+* text=auto
+
+# Patch files should always have unix line-endings
+*.patch text eol=lf
+
+# Binary files that should not be normalized
+*.pdf binary
+*.png binary

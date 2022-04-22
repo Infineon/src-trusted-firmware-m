@@ -1,0 +1,13 @@
+diff --git a/test/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml b/test/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml
+index eddc3ed..fa09461 100644
+--- a/test/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml
++++ b/test/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml
+@@ -11,7 +11,7 @@
+   "type": "PSA-ROT",
+   "priority": "NORMAL",
+   "entry_point": "tfm_ps_test_init",
+-  "stack_size": "0x500",
++  "stack_size": "0xa00",
+   "secure_functions": [
+     {
+       "name": "TFM_PS_TEST_PREPARE",

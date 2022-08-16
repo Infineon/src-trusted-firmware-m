@@ -40,7 +40,7 @@ These services are defined by the [PSA API](https://github.com/ARM-software/psa-
 ## Quick Start
 
 ### ModusToolBox support
-Refer to the Building Multi-Core TF-M with ModusToolBox section in [Cypress PSoC64 Specifics documentation](https://github.com/Infineon/src-trusted-firmware-m/platform/ext/target/cypress/psoc64/cypress_psoc64_spec.rst)
+Refer to the Building Multi-Core TF-M with ModusToolBox section in [Cypress PSoC64 Specifics documentation](https://github.com/Infineon/src-trusted-firmware-m/blob/master/platform/ext/target/cypress/psoc64/cypress_psoc64_spec.rst)
 
 
 ### Provisioning the kit

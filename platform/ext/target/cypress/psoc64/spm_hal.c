@@ -51,13 +51,16 @@ static uint32_t g_min_sleep_time = 0xffffffff;
 static uint32_t g_sleep_time = 0;
 #endif
 
-#ifndef CY_EXTCLK_CONFIG_FROM_POLICY
-/*
- * In this case, the values in the struct will need to be set appropriately.
- * Note that the pointer values should be set to point into GPIO->PRT[].
- */
-const
-#endif
+/* TODO: uncomment this code once PDL interface is changed to accept constant pointer.
+ * Currently IAR gives an error while trying to sign constant structure
+ * to pointer which expects non constant value */
+// #ifndef CY_EXTCLK_CONFIG_FROM_POLICY
+// /*
+//  * In this case, the values in the struct will need to be set appropriately.
+//  * Note that the pointer values should be set to point into GPIO->PRT[].
+//  */
+// const
+// #endif
 static cy_stc_pra_extclk_policy_t ext_clk_policy = {
     .extClkEnable = false,
     .ecoEnable = false,

@@ -165,14 +165,6 @@ void platform_init(void)
 #ifdef TFM_ENABLE_IRQ_TEST
     cy_en_sysint_status_t int_rc;
 #endif
-#ifdef CY_HW_SETTINGS_FROM_POLICY
-    /* populate hw_settings structure from policy*/
-    cy_get_policy_hw_settings(&hw_settings);
-#else
-    hw_settings.uart_base = SCB5_BASE,
-    hw_settings.uart_enabled = true,
-#endif
-
     Cy_PDL_Init(CY_DEVICE_CFG);
 
     Cy_SysLib_SetWaitStates(false, 150UL);

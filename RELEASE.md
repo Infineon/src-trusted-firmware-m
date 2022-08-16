@@ -17,13 +17,21 @@ See the [README.md](./README.md) for an additional description of the TF-M softw
 
 ## Changelog
 
+### v1.3.5
+* Updated to use PSoC64 Secure Boot Utilities Middleware Library v1.0.1
+* Fixed known issue related to the constant value (100ms) for acquire debug window. If CY_HW_SETTINGS_FROM_POLICY is defined,
+ the CM4 debug permissions specified in the policy used to provision the board will be respected and the "acq_win" from the 
+ policy will be used to determine how long to wait for a debugger connection on the CM4 AP. If CY_HW_SETTINGS_FROM_POLICY 
+ is not defined, this behaviour is controlled by the hw_settings structure.
+* Updated cm4-app-example.mk template for ModusToolBox to simplify switching from sources to binary.
+
 ### v1.3.3
 * Updated to use PDL v2.4.0
 * Updated TFM to use core-lib v1.3.0 as dependency
 * Added COMPONENT_TFM_S_SRC component to the trusted-firmware-m ModusToolbox library
   to support building of secure image from sources.
 * Added possibility to remove policy parsing concept with CY_POLICY_CONCEPT=OFF.
-  Refer to Optional arguments section in documentation [Cypress PSoC64 Specifics](https://github.com/Infineon/src-trusted-firmware-m/platform/ext/target/cypress/psoc64/cypress_psoc64_spec.rst)
+  Refer to Optional arguments section in documentation [Cypress PSoC64 Specifics](https://github.com/Infineon/src-trusted-firmware-m/blob/master/platform/ext/target/cypress/psoc64/cypress_psoc64_spec.rst)
 * Updated ECC Crypto algorithms to use software implementation only, due to
   security concerns for HW acceleration. See details in [cypress_mxcrypto_ecc_vulnerability.rst](./docs/reference/security_advisories/cypress_mxcrypto_ecc_vulnerability.rst)
 * Increased performance of PS/ITS by setting ITS_BUF_SIZE and ITS_MAX_ASSET_SIZE
@@ -48,10 +56,7 @@ See the [README.md](./README.md) for an additional description of the TF-M softw
 
 ## Known Issues
 * Currently, IPC semaphores are not safe from security point of view and do not recommended to use
-* The accessTime from the debugger policy will not have imact on the debug window for programmer/debugger in TF-M.
- It has constant vlaue equal to 100ms. Please change it manually in the file: [tfm_hal_isolation.c](https://github.com/Infineon/src-trusted-firmware-m/platform/ext/target/cypress/psoc64/tfm_hal_isolation.c)
- under the following comment: "The delay is required after Access port was enabled for debugger/programmer to connect and set TEST BIT".
-* Due to changes in TF-M 1.3.3 the existing latency could be not enought, please take care about latency update, if
+* Due to changes in TF-M 1.3.3 the existing latency could be not enough, please take care about latency update, if
  any issues observed (for example CY_CFG_PWR_DEEPSLEEP_LATENCY in FreeRTOS).
 
 
@@ -73,7 +78,7 @@ This version of TF-M was validated for compatibility with the following Software
 | CMSIS-Core(M)                                                                 | 5.5.0         |
 | MbedTLS                                                                       | 2.25.0        |
 | PSoC6 MCUs acceleration for mbedTLS library                                   | 1.3.0         |
-| PSoC64 Secure Boot Utilities Middleware Library                               | 1.0.0         |
+| PSoC64 Secure Boot Utilities Middleware Library                               | 1.0.1         |
 | PSoC 6 Peripheral Driver Library (PDL)                                        | 2.4.0         |
 | Board Support Package (BSP)                                                   | 2.3.0         |
 | Core Library                                                                  | 1.3.0         |
@@ -87,7 +92,7 @@ Use the following links for more information, as needed:
 * [Cypress Semiconductor Corporation (an Infineon company) GitHub](https://github.com/Infineon)
 * [PSoC® 64 Secure Microcontrollers](https://www.infineon.com/cms/en/product/microcontroller/32-bit-psoc-arm-cortex-microcontroller/psoc-6-32-bit-arm-cortex-m4-mcu/psoc-64)
 * [Trusted Firmware website](https://www.trustedfirmware.org)
-* [Cypress PSoC64 Specifics documentation](https://github.com/Infineon/src-trusted-firmware-m/platform/ext/target/cypress/psoc64/cypress_psoc64_spec.rst)
+* [Cypress PSoC64 Specifics documentation](https://github.com/Infineon/src-trusted-firmware-m/blob/master/platform/ext/target/cypress/psoc64/cypress_psoc64_spec.rst)
 * [TF-M project](https://www.trustedfirmware.org/projects/tf-m)
 
 ---

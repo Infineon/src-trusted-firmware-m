@@ -7,11 +7,21 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 #include "utilities.h"
 #include "cy_p64_jwt_policy.h"
 #include "cy_p64_syscalls.h"
 #include "tfm_plat_defs.h"
 #include "cy_policy.h"
+
+
+/* policy attribute names */
+#define CY_ACQUIRE_WINDOW_ATT_NAME "acq_win"
+
+/* policy attribute values */
+#define CY_DEBUG_PERM_ALLOW "allowed"
+#define CY_DEBUG_PERM_ENABLE "enabled"
+
 
 /**
  * \brief Retrieve policy from SysCall, Decode it, and Create JSON structure
@@ -186,37 +196,58 @@ void cy_get_policy_hw_settings(struct policy_hw_settings *settings)
     cy_p64_error_codes_t status;
     cy_p64_cJSON *jsonPacket = NULL;
     const cy_p64_cJSON *json;
-    uint32_t base;
+    uint32_t val;
     bool     tmp;
+    const char *str;
     enum tfm_plat_err_t err;
+
+    /* Default all values */
+    settings->uart_base = 0;
+    settings->uart_enabled = false;
+    settings->cm4_ap_enabled = false;
+    settings->debug_window = 100;
 
     err = get_decoded_policy_jwt_packet(&jsonPacket);
     if (err != TFM_PLAT_ERR_SUCCESS) {
-        settings->uart_base = 0;
-        settings->uart_enabled = false;
         return;
     }
 
     /* Logging UART settings */
     json = cy_p64_find_json_item(CY_DEBUG_UART_BASE_PATH, jsonPacket);
-    if(json != NULL) {
-        status = cy_p64_json_get_uint32(json, &base);
-    }
-    if (json == NULL || status != CY_P64_SUCCESS) {
-        settings->uart_base = 0;
-        settings->uart_enabled = false;
-        return;
-    } else {
-        settings->uart_base = base;
+    if (json != NULL) {
+        status = cy_p64_json_get_uint32(json, &val);
+        if (status == CY_P64_SUCCESS) {
+            settings->uart_base = val;
+        }
     }
 
     json = cy_p64_find_json_item(CY_DEBUG_UART_FLAG_PATH, jsonPacket);
-    if(json != NULL) {
+    if (json != NULL) {
         status = cy_p64_json_get_boolean(json, &tmp);
+        if (status == CY_P64_SUCCESS) {
+            settings->uart_enabled = tmp;
+        }
     }
-    if (json == NULL || status != CY_P64_SUCCESS) {
-        settings->uart_enabled = false;
-    } else {
-        settings->uart_enabled = tmp;
+
+    /* CM4 AP settings */
+    json = cy_p64_find_json_item(CY_CM4_DEBUG_PERMISSION_PATH, jsonPacket);
+    if (json != NULL) {
+        status = cy_p64_json_get_string(json, &str);
+        if (status == CY_P64_SUCCESS) {
+            if ((strcmp(str, CY_DEBUG_PERM_ALLOW) == 0) ||
+                (strcmp(str, CY_DEBUG_PERM_ENABLE) == 0)) {
+                settings->cm4_ap_enabled = true;
+            }
+        }
+    }
+    status = cy_p64_policy_get_image_record(jsonPacket, 1, &json);
+    if (status == CY_P64_SUCCESS) {
+        json = cy_p64_find_json_item(CY_ACQUIRE_WINDOW_ATT_NAME, json);
+        if (json != NULL) {
+            status = cy_p64_json_get_uint32(json, &val);
+            if (status == CY_P64_SUCCESS) {
+                settings->debug_window = val;
+            }
+        }
     }
 }

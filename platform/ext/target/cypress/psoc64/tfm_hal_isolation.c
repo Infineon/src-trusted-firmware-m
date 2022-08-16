@@ -32,11 +32,23 @@ static void boot_tasks_handler(void)
     enum tfm_plat_err_t err;
 #endif
 
-    /* Try to enable CM4 DAP */
-    if (cy_p64_access_port_control(CY_P64_CM4_AP, CY_P64_AP_EN) == CY_P64_SUCCESS) {
-        /* The delay is required after Access port was enabled for
-        * debugger/programmer to connect and set TEST BIT */
-        Cy_SysLib_Delay(100);
+#ifdef CY_HW_SETTINGS_FROM_POLICY
+    /* populate hw_settings structure from policy*/
+    cy_get_policy_hw_settings(&hw_settings);
+#else
+    hw_settings.uart_base = SCB5_BASE;
+    hw_settings.uart_enabled = true;
+    hw_settings.cm4_ap_enabled = true;
+    hw_settings.debug_window = 100;
+#endif
+
+    if (hw_settings.cm4_ap_enabled) {
+        /* Try to enable CM4 DAP */
+        if (cy_p64_access_port_control(CY_P64_CM4_AP, CY_P64_AP_EN) == CY_P64_SUCCESS) {
+            /* The delay is required after Access port was enabled for
+            * debugger/programmer to connect and set TEST BIT */
+            Cy_SysLib_Delay(hw_settings.debug_window);
+        }
     }
 
     if(CY_P64_IS_TEST_MODE_SET)

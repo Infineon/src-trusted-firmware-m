@@ -71,6 +71,6 @@ set(CY_PSOC6PDL_LIB_PATCH_DIR           "${CMAKE_CURRENT_SOURCE_DIR}/platform/ex
 
 set(CY_P64_UTILS_LIB_PATH               "DOWNLOAD"  CACHE PATH      "Path to p64_utils repo (or DOWNLOAD to fetch automatically")
 set(CY_P64_UTILS_LIB_GIT_REMOTE         "https://github.com/Infineon/p64_utils.git"  CACHE STRING      "p64_utils library repo URL (to fetch automatically")
-set(CY_P64_UTILS_LIB_VERSION            "release-v1.0.0" CACHE STRING "The version of p64_utils to use")
+set(CY_P64_UTILS_LIB_VERSION            "release-v1.0.1" CACHE STRING "The version of p64_utils to use")
 set(CY_P64_UTILS_LIB_PATCH_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/p64_utils"
     CACHE PATH      "Path to folder with p64_utils patches. Set empty string to skip patching.")

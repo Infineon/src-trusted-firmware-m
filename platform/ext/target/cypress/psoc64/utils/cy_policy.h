@@ -44,6 +44,8 @@ extern "C" {
  */
 
 /* Provisioning policy paths */
+#define CY_CM4_DEBUG_PERMISSION_PATH "debug/m4/permission"
+
 #define CY_ATT_DATA_URL_PATH "tfm/attestation_data/verification_service_url"
 #define CY_ATT_DATA_PROFILE_PATH "tfm/attestation_data/attestation_profile_definition"
 #define CY_ATT_IMPL_ID_PATH "tfm/attestation_data/implementation_id"
@@ -65,13 +67,14 @@ extern "C" {
 #define CY_DEBUG_UART_BASE_PATH "tfm/debug_port/uart_base"
 #define CY_DEBUG_UART_FLAG_PATH "tfm/debug_port/enabled"
 
-
 /**
  * \brief Stores the hardware-related policy settings
  */
 struct policy_hw_settings {
     uint32_t uart_base;
     bool uart_enabled;
+    bool cm4_ap_enabled;
+    uint32_t debug_window; /* number of msec to wait for debug connection */
 };
 
 /**

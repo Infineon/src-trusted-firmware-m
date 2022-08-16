@@ -143,11 +143,11 @@ target_compile_definitions(platform_s
 target_link_libraries(platform_s
     PUBLIC
         ${CY_CORE_LIB_TARGET}
+        ${P64_UTILS_LIB_TARGET}
     PRIVATE
         tfm_spm
         tfm_app_rot_partition_ps
         ${PSOC6PDL_LIB_S_TARGET}
-        ${P64_UTILS_LIB_TARGET}
 )
 
 target_compile_definitions(tfm_app_rot_partition_ps

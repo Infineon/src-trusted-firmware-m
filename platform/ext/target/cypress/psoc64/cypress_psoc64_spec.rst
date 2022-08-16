@@ -12,10 +12,7 @@ Use the following policy file for provisioning and signing:
 policy_multi_CM0_CM4_tfm.json
 
 Please make sure you have all required software installed as explained in the
-:doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
-
-Please also make sure that all the source code are fetched by following
-:doc:`general building instruction </docs/getting_started/tfm_build_instruction>`.
+`Prerequisites <https://tf-m-user-guide.trustedfirmware.org/platform/cypress/psoc64/cypress_psoc64_spec.html#prerequisites>`_ section.
 
 Install CySecureTools or update it to the newest version (2.0.0 at the time of
 writing)
@@ -43,12 +40,12 @@ Building Multi-Core TF-M with ModusToolBox
 ******************************************
 
 The trusted-firmware-m library consists of 3 components:
-* COMPONENT_TFM_NS_INTERFACE - this component allows to build TF-M NSPE.
-* COMPONENT_TFM_S_FW - this component contains prebuilt binaries of SPE.
-* COMPONENT_TFM_S_SRC - this component allows to build TF-M SPE from source files via CMake.
+    * COMPONENT_TFM_NS_INTERFACE - this component allows to build TF-M NSPE.
+    * COMPONENT_TFM_S_FW - this component contains prebuilt binaries of SPE.
+    * COMPONENT_TFM_S_SRC - this component allows to build TF-M SPE from source files via CMake.
 
-Note: The CM4 application uses result of CM0+ build, so CM0+ application should built firstly. 
-      You can build CM0+ and CM4 applications separately. 
+Note: The CM4 application uses result of CM0+ build, so CM0+ application should built firstly.
+      You can build CM0+ and CM4 applications separately.
 
 Pre-requisites for Linux
 =====================
@@ -70,9 +67,9 @@ In the Makefile of the project, ensure RTOS_AWARE is an enabled component if RTO
 Using the library
 =====================
 
-Include the relevant PSA API header file and refer to [PSA API](https://github.com/ARM-software/psa-arch-tests/tree/master/api-specs)
+Include the relevant PSA API header file and refer to `PSA API <https://github.com/ARM-software/psa-arch-tests/tree/master/api-specs>`_
 
-For CM0+ Application - refer to following [CM0p example makefile](https://github.com/Infineon/src-trusted-firmware-m/platform/ext/target/cypress/psoc64/mtb_tools/COMPONENT_TFM_S_SRC/make/cm0p-app-example.mk)
+For CM0+ Application - refer to following `CM0p example makefile <https://github.com/Infineon/trusted-firmware-m/blob/master/COMPONENT_TFM_S_SRC/make/cm0p-app-example.mk>`_
 
 This library allows to build TF-M SPE from source files via CMake.
 
@@ -95,7 +92,7 @@ Optional variables to configure TF-M in Makefile:
     * Release - release with debug info (CMAKE_BUILD_TYPE=Release)
 
 
-For CM4 Application - refer to following [CM4 example makefile](https://github.com/Infineon/src-trusted-firmware-m/platform/ext/target/cypress/psoc64/mtb_tools/COMPONENT_TFM_S_SRC/make/cm4-app-example.mk)
+For CM4 Application - refer to following `CM4 example makefile <https://github.com/Infineon/trusted-firmware-m/blob/master/COMPONENT_TFM_S_SRC/make/cm4-app-example.mk>`_
 
 Edit path to TF-M Secure Application by changing ```TFM_S_APP_PATH```.
 
@@ -174,7 +171,8 @@ Optional arguments
        `add_link_options <https://cmake.org/cmake/help/v3.15/command/add_link_options.html>`_
        for more details how to specify options for linker.
 
-see :ref:`tfm_cmake_configuration` for
+
+see `Cmake configuration <https://github.com/Infineon/src-trusted-firmware-m/blob/master/docs/getting_started/tfm_build_instruction.rst#cmake-configuration>`_ section for
 more information.
 
 Build Instructions

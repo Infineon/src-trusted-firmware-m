@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file system_psoc6_cm4.c
-* \version 2.90.1
+* \version 2.95.1
 *
 * The device system-source file.
 *
@@ -90,6 +90,8 @@ uint32_t cy_BleEcoClockFreqHz = 0UL;
 /* SCB->CPACR */
 #define SCB_CPACR_CP10_CP11_ENABLE      (0xFUL << 20u)
 
+/** Holds the AHB frequency. Updated by \ref SystemCoreClockUpdate(). */
+uint32_t cy_AhbFreqHz = CY_CLK_SYSTEM_FREQ_HZ_DEFAULT;
 
 /*******************************************************************************
 * SystemInit()
@@ -103,7 +105,7 @@ uint32_t cy_BleEcoClockFreqHz = 0UL;
 
 /* IPC_STRUCT7->DATA configuration */
 #define CY_STARTUP_CM0_DP_STATE         (0x2uL)
-#define CY_STARTUP_IPC7_DP_OFFSET       (0x28u)
+#define CY_STARTUP_IPC7_DP_OFFSET       (28u)
 
 
 /*******************************************************************************
@@ -121,9 +123,6 @@ uint32_t cy_BleEcoClockFreqHz = 0UL;
 uint32_t cy_delayFreqKhz  = CY_SYSLIB_DIV_ROUNDUP(CY_CLK_SYSTEM_FREQ_HZ_DEFAULT, CY_DELAY_1K_THRESHOLD);
 
 uint8_t cy_delayFreqMhz  = (uint8_t)CY_SYSLIB_DIV_ROUNDUP(CY_CLK_SYSTEM_FREQ_HZ_DEFAULT, CY_DELAY_1M_THRESHOLD);
-
-uint32_t cy_delay32kMs    = CY_DELAY_MS_OVERFLOW_THRESHOLD *
-                            CY_SYSLIB_DIV_ROUNDUP(CY_CLK_SYSTEM_FREQ_HZ_DEFAULT, CY_DELAY_1K_THRESHOLD);
 
 
 /*******************************************************************************
@@ -306,8 +305,8 @@ void SystemCoreClockUpdate (void)
         cy_delayFreqKhz = CY_SYSLIB_DIV_ROUNDUP(SystemCoreClock, CY_DELAY_1K_THRESHOLD);
         TFM_COVERITY_BLOCK_END(cert_int31_c cert_int30_c)
 
-        TFM_COVERITY_DEVIATE_LINE(cert_int30_c, "DRIVERS-8492, wrap occurs if SystemCoreClock = 150 MHz, the only consequence is that Cy_SysLib_Delay() works incorrectly for delays longer than 32768 ms")
-        cy_delay32kMs   = CY_DELAY_MS_OVERFLOW_THRESHOLD * cy_delayFreqKhz;
+        /* Get the frequency of AHB source, CLK HF0 is the source for AHB*/
+        cy_AhbFreqHz = Cy_SysClk_ClkHfGetFrequency(0UL);
     }
 }
 
@@ -323,11 +322,12 @@ void Cy_SystemInitFpuEnable(void)
 {
     #if defined (__FPU_USED) && (__FPU_USED == 1U)
         uint32_t  interruptState;
-        interruptState = Cy_SysLib_EnterCriticalSection();
+        interruptState = __get_PRIMASK();
+        __disable_irq();
         SCB->CPACR |= SCB_CPACR_CP10_CP11_ENABLE;
         __DSB();
         __ISB();
-        Cy_SysLib_ExitCriticalSection(interruptState);
+        __set_PRIMASK(interruptState);
     #endif /* (__FPU_USED) && (__FPU_USED == 1U) */
 }
 

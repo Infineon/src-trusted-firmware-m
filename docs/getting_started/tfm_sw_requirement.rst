@@ -281,7 +281,7 @@ The following additional tools are needed:
 
     - Python3 and the following modules:
     - Sphinx v1.7.9
-    - m2r v0.2.0
+    - m2r2 v0.3.3
     - sphinxcontrib-plantuml
     - sphinx-rtd-theme
     - Graphviz dot v2.38.0 or later
@@ -414,7 +414,7 @@ Dependency chain:
     state JRE as "JRE" <<doc>> : Java Runtime Environment
     state gwiz as "Graphwiz dot" <<doc>>
     state Sphinx as "Sphinx" <<doc>>
-    state m2r as "m2r" <<doc>>
+    state m2r2 as "m2r2" <<doc>>
     state PlantUML as "PlantUML" <<doc>>
     state LaTex as "LaTex" <<pdf>>
     state PdfLaTex as "PdfLaTex" <<<<pdf>>>>
@@ -441,10 +441,10 @@ Dependency chain:
 
     [*] --> u_guide
     u_guide --> Sphinx
-    Sphinx --> m2r
+    Sphinx --> m2r2
     Sphinx --> rtd_theme
     Sphinx --> sphnix_puml
-    m2r --> Python3
+    m2r2 --> Python3
     rtd_theme --> Python3
     sphnix_puml --> Python3
     Sphinx --> PlantUML
@@ -468,3 +468,5 @@ Dependency chain:
 --------------
 
 *Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

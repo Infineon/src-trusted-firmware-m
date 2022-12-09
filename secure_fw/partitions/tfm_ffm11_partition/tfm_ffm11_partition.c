@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
@@ -33,8 +32,10 @@ static void tfm_ffm11_service1(void)
     }
 
     /* Decode the message */
+    TFM_COVERITY_FP_LINE(UNINIT, "psa_get() sets msg")
     switch (msg.type) {
     case PSA_IPC_CALL:
+        TFM_COVERITY_FP_LINE(UNINIT, "psa_get() sets msg")
         if (msg.in_size[0] != sizeof(arg)) {
             status = PSA_ERROR_PROGRAMMER_ERROR;
             break;

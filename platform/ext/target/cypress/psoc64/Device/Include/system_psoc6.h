@@ -1,14 +1,12 @@
 /***************************************************************************//**
 * \file system_psoc6.h
-* \version 2.80
+* \version 2.95.1
 *
 * \brief Device system header file.
 *
 ********************************************************************************
 * \copyright
-* Copyright (c) 2016-2022 Cypress Semiconductor Corporation (an Infineon company)
-* or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
-*
+* Copyright 2016-2021 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +27,7 @@
 #define _SYSTEM_PSOC6_H_
 
 /**
-* \addtogroup group_system_config
+* \addtogroup group_system_config_cm4
 * \{
 * Provides device startup, system configuration, and linker script files.
 * The system startup provides the followings features:
@@ -71,7 +69,7 @@
 * Cy_SysEnableCM4() function call.
 * By default, the COMPONENT_CM0P_SLEEP prebuilt image is used for the CM0p core.
 * More about CM0+ prebuilt images, see here:
-* https://github.com/cypresssemiconductorco/psoc6cm0p
+* https://github.com/Infineon/psoc6cm0p
 *
 * Change the flash and RAM sizes by editing the macros value in the
 * linker files for both CPUs:
@@ -108,7 +106,7 @@
 * Cy_SysEnableCM4() function call.
 * By default, the COMPONENT_CM0P_SLEEP prebuilt image is used for the CM0p core.
 * More about CM0+ prebuilt images, see here:
-* https://github.com/cypresssemiconductorco/psoc6cm0p
+* https://github.com/Infineon/psoc6cm0p
 *
 * \note The linker files provided with the PDL are generic and handle all common
 * use cases. Your project may not use every section defined in the linker files.
@@ -158,7 +156,7 @@
 * Cy_SysEnableCM4() function call.
 * By default, the COMPONENT_CM0P_SLEEP prebuilt image is used for the CM0p core.
 * More about CM0+ prebuilt images, see here:
-* https://github.com/cypresssemiconductorco/psoc6cm0p
+* https://github.com/Infineon/psoc6cm0p
 *
 * Change the flash and RAM sizes by editing the macros value in the
 * linker files for both CPUs:
@@ -242,7 +240,7 @@
 * clib-support library that provides newlib-compatible implementations of
 * 'sbrk', '__malloc_lock' and '__malloc_unlock':
 * <br>
-* https://github.com/cypresssemiconductorco/clib-support.
+* https://github.com/Infineon/clib-support.
 *
 * \subsubsection group_system_config_heap_stack_config_mdk ARM Compiler
 * - <b>Editing source code files</b>\n
@@ -336,6 +334,48 @@
 *       <th>Reason for Change</th>
 *   </tr>
 *   <tr>
+*       <td rowspan="1">2.95.1</td>
+*       <td>Restructured documentation.</td>
+*       <td>Documentation update.</td>
+*   </tr>
+*   <tr>
+*       <td rowspan="1">2.95</td>
+*       <td>Update FPU enable function with CMSIS macros to disable/enable interrupts</td>
+*       <td>Move to stadnard inline CMSIS ARM macros</td>
+*   </tr>
+*   <tr>
+*       <td rowspan="2">2.91</td>
+*       <td>Updated memory configuration for PSoC 64 devices.</td>
+*       <td>Flash and RAM memory allocation updated.</td>
+*   </tr>
+*   <tr>
+*       <td>Added cys06xxa_cm4 linker scripts.</td>
+*       <td>New device support.</td>
+*   </tr>
+*   <tr>
+*       <td rowspan="4">2.90.1</td>
+*       <td>Updated \ref group_system_config_heap_stack_config_gcc section with the note
+*           on the dynamic memory allocation for ARM GCC.</td>
+*       <td>Documentation update.</td>
+*   </tr>
+*   <tr>
+*       <td>Updated system_psoc6.h to include custom CY_SYSTEM_PSOC6_CONFIG passed as compiler macro.</td>
+*       <td>Improve configuration flexibility.</td>
+*   </tr>
+*   <tr>
+*       <td>Updated attribute usage for the linker section placement in CM0+ startup code</td>
+*       <td>Enhancement based on usability feedback.</td>
+*   </tr>
+*   <tr>
+*       <td>Renamed the '.cy_xip' linker script region as 'cy_xip'</td>
+*       <td>Enable access to the XIP region start/end addresses from the C code.</td>
+*   </tr>
+*   <tr>
+*       <td>2.90</td>
+*       <td>Updated linker scripts for PSoC 64 Secure MCU cyb06xx7 devices.</td>
+*       <td>Flash allocation adjustment.</td>
+*   </tr>
+*   <tr>
 *       <td rowspan="2">2.80</td>
 *       <td>Updated linker scripts for PSoC 64 Secure MCU devices.</td>
 *       <td>Updated FLASH and SRAM memory area definitions in cyb0xxx linker script templates
@@ -346,9 +386,9 @@
 *       <td>Updated PSoC 64 Secure MCU startup sequence to initialize the Protected Register Access driver.</td>
 *   </tr>
 *   <tr>
-*     <td>2.70.1</td>
-*     <td>Updated documentation for the better description of the existing startup implementation.</td>
-*     <td>User experience enhancement.</td>
+*       <td>2.70.1</td>
+*       <td>Updated documentation for the better description of the existing startup implementation.</td>
+*       <td>User experience enhancement.</td>
 *   </tr>
 *   <tr>
 *       <td rowspan="5">2.70</td>
@@ -443,30 +483,18 @@
 * </table>
 *
 *
-* \defgroup group_system_config_macro Macro
+* \defgroup group_system_config_macro Macros
 * \{
-*   \defgroup group_system_config_system_macro            System
-*   \defgroup group_system_config_cm4_status_macro        Cortex-M4 Status
-*   \defgroup group_system_config_user_settings_macro     User Settings
+*   \defgroup group_system_config_system_macro            System Macros
+*   \defgroup group_system_config_cm4_status_macro        Cortex-M4 Status Macros
+*   \defgroup group_system_config_user_settings_macro     User Settings Macros
 * \}
 * \defgroup group_system_config_functions Functions
 * \{
-*   \defgroup group_system_config_system_functions        System
-*   \defgroup group_system_config_cm4_functions           Cortex-M4 Control
+*   \defgroup group_system_config_cm4_functions           Cortex-M4 Control Functions
 * \}
 * \defgroup group_system_config_globals Global Variables
 *
-* \}
-*/
-
-/**
-* \addtogroup group_system_config_system_functions
-* \{
-*   \details
-*   The following system functions implement CMSIS Core functions.
-*   Refer to the [CMSIS documentation]
-*   (http://www.keil.com/pack/doc/CMSIS/Core/html/group__system__init__gr.html "System and Clock Configuration")
-*   for more details.
 * \}
 */
 
@@ -506,6 +534,17 @@ extern "C" {
 * \addtogroup group_system_config_user_settings_macro
 * \{
 */
+
+/*
+ * Include optional application-specific configuration header.
+ *
+ * For example, custom system_psoc6_config.h can be included here
+ * by adding the below macro definition to the build system:
+ * DEFINES+=CY_SYSTEM_PSOC6_CONFIG='"system_psoc6_config.h"'
+ */
+#if defined(CY_SYSTEM_PSOC6_CONFIG)
+#include CY_SYSTEM_PSOC6_CONFIG
+#endif
 
 
 /***************************************************************************//**
@@ -559,14 +598,21 @@ extern "C" {
 /** \} group_system_config_system_macro */
 
 
-/**
-* \addtogroup group_system_config_system_functions
-* \{
-*/
-extern void SystemInit(void);
+/** \cond */
+#if defined(__ARMCC_VERSION)
+    /*
+     * This line is modified from the BSP version for TF-M.
+     * __attribute__((constructor)) is removed because the TF-M linker script
+     * doesn't support adding it. Leaving that atrribute here results in a linker
+     * error L6216E for section .init_array
+     */
+    extern void SystemInit(void);
+#else
+    extern void SystemInit(void);
+#endif /* (__ARMCC_VERSION) */
 
 extern void SystemCoreClockUpdate(void);
-/** \} group_system_config_system_functions */
+/** \endcond */
 
 
 /**
@@ -592,7 +638,6 @@ extern void     Cy_SystemInitFpuEnable(void);
 
 extern uint32_t cy_delayFreqKhz;
 extern uint8_t  cy_delayFreqMhz;
-extern uint32_t cy_delay32kMs;
 /** \endcond */
 
 
@@ -651,20 +696,22 @@ extern uint32_t cy_delay32kMs;
 /******************************************************************************/
 
 
+
 /** \addtogroup group_system_config_globals
 * \{
 */
-
-extern uint32_t SystemCoreClock;
 extern uint32_t cy_BleEcoClockFreqHz;
-extern uint32_t cy_Hfclk0FreqHz;
-extern uint32_t cy_PeriClkFreqHz;
-
 /** \} group_system_config_globals */
 
-
-
 /** \cond INTERNAL */
+extern uint32_t cy_Hfclk0FreqHz;
+extern uint32_t cy_PeriClkFreqHz;
+extern uint32_t SystemCoreClock;
+extern uint32_t cy_AhbFreqHz;
+
+
+
+
 /*******************************************************************************
 * Backward compatibility macros. The following code is DEPRECATED and must
 * not be used in new projects

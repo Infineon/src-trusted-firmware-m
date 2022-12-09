@@ -226,6 +226,7 @@ static void tfm_crypto_ipc_handler(void)
             }
 
             /* Process the message type */
+            TFM_COVERITY_FP_LINE(UNINIT, "psa_get() sets msg")
             switch (msg.type) {
             case PSA_IPC_CONNECT:
             case PSA_IPC_DISCONNECT:
@@ -233,9 +234,11 @@ static void tfm_crypto_ipc_handler(void)
                 break;
             case PSA_IPC_CALL:
                 /* Parse the message */
+                TFM_COVERITY_FP_LINE(UNINIT, "psa_get() sets msg")
                 status = tfm_crypto_parse_msg(&msg, &iov, &sfn_id);
                 /* Call the dispatcher based on the SID passed as type */
                 if (status == PSA_SUCCESS) {
+                    TFM_COVERITY_FP_LINE(UNINIT, "psa_get() sets msg")
                     status = tfm_crypto_call_sfn(&msg, &iov, sfn_id);
                 }
                 psa_reply(msg.handle, status);

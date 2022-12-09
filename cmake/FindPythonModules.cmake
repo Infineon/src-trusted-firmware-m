@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -20,15 +22,15 @@
 #   Where XXX is the upper case name of the module.
 #
 #Examples
-#   To look for m2r and report error if not found
-#       find_module(PythonModules COMPONENTS m2r)
-#       if (PY_M2R_FOUND)
+#   To look for m2r2 and report error if not found
+#       find_module(PythonModules COMPONENTS m2r2)
+#       if (PY_M2R2_FOUND)
 #           do something
 #       endif()
 #
-#   To look for m2r and do not report error if not found
-#       find_module(PythonModules OPTIONAL_COMPONENTS m2r)
-#       if (PY_M2R_FOUND)
+#   To look for m2r2 and do not report error if not found
+#       find_module(PythonModules OPTIONAL_COMPONENTS m2r2)
+#       if (PY_M2R2_FOUND)
 #           do something
 #       endif()
 

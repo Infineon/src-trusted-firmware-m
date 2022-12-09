@@ -223,6 +223,7 @@ if tfm_def_build_doxygen:
 # auto-detected values set above
 if cmake_env is None:
     cmake_env = {"TFM_ROOT_DIR": tfm_def_root_dir,
+                 "CMAKE_SOURCE_DIR": tfm_def_root_dir,
                  "DOXYGEN_EXECUTABLE": tfm_def_doxygen_loc,
                  "DOXYGEN_DOT_EXECUTABLE": tfm_def_doxygen_dot_loc,
                  "PLANTUML_JAR_PATH": tfm_def_plantum_loc,

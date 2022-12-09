@@ -8,6 +8,6 @@ Jinja2>=2.10.3
 latex
 PyYAML
 Sphinx>=1.4
-m2r
+m2r2
 sphinx-rtd-theme
 sphinxcontrib-plantuml

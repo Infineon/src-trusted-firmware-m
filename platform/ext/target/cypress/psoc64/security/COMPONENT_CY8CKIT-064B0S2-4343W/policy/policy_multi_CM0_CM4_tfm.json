@@ -56,10 +56,10 @@
         "firmware": [
             {
                 "boot_auth": [
-                    5
+                    3
                 ],
                 "bootloader_keys": [
-                    { "kid": 5, "key": "../keys/oem_state.json" }
+                    { "kid": 3, "key": "../keys/cy_pub_key.json" }
                 ],
                 "id": 0,
                 "launch": 1,
@@ -209,7 +209,7 @@
         "group_private_key": "../keys/grp_priv_key.json",
         "provision_device_private_key": false,
         "device_private_key": "../keys/dev_priv_key.json",
-        "cy_auth": "../packets/cy_auth_2m_s0_sample.jwt"
+        "cy_auth": "../packets/cy_auth_2m_b0_sample.jwt"
     },
     "custom_data_sections": ["tfm"],
     "tfm":

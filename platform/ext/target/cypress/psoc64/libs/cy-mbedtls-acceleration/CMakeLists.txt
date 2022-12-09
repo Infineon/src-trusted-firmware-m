@@ -70,6 +70,7 @@ endif()
 
 set(CMAKE_PSOC64_DIR        ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM})
 set(CY_CORE_LIB_TARGET      cy_core_lib)
+set(PSOC6PDL_LIB_S_TARGET psoc6pdl_lib_s)
 set(CMAKE_CY_MBEDTLS_ACCELERATION_SRC_DIR
                             ${CY_MBEDTLS_ACCELERATION_PATH}/mbedtls_MXCRYPTO)
 
@@ -92,15 +93,10 @@ target_sources(${PSOC6_CRYPTO_LIB_TARGET}
 target_include_directories(${PSOC6_CRYPTO_LIB_TARGET}
     INTERFACE
         ${CMAKE_CY_MBEDTLS_ACCELERATION_SRC_DIR}
-        ${CY_PSOC6PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
-        ${CY_PSOC6PDL_LIB_PATH}/drivers/include
-        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
-        ${CMAKE_PSOC64_DIR}/Device/Include
 )
 
 target_link_libraries(${PSOC6_CRYPTO_LIB_TARGET}
     PUBLIC
         ${CY_CORE_LIB_TARGET}
-    PRIVATE
         ${PSOC6PDL_LIB_S_TARGET}
 )

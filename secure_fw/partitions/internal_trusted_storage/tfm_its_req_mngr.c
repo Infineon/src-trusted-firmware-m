@@ -210,8 +210,11 @@ static psa_status_t tfm_its_set_ipc(void)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    TFM_COVERITY_DEVIATE_LINE(MISRA_C_2012_Rule_9_1, "psa_read() handles all parameters by CPU registers")
+    TFM_COVERITY_BLOCK(TFM_COVERITY_DEVIATE(MISRA_C_2012_Rule_9_1,
+                                            "psa_read() handles all parameters by CPU registers")
+                       TFM_COVERITY_FP(UNINIT, "psa_read() sets uid and create_flags"))
     return tfm_its_set(msg.client_id, uid, data_length, create_flags);
+    TFM_COVERITY_BLOCK_END(MISRA_C_2012_Rule_9_1 UNINIT)
 }
 
 static psa_status_t tfm_its_get_ipc(void)
@@ -240,9 +243,12 @@ static psa_status_t tfm_its_get_ipc(void)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    TFM_COVERITY_DEVIATE_LINE(MISRA_C_2012_Rule_9_1, "psa_read() handles all parameters by CPU registers")
+    TFM_COVERITY_BLOCK(TFM_COVERITY_DEVIATE(MISRA_C_2012_Rule_9_1,
+                                            "psa_read() handles all parameters by CPU registers")
+                       TFM_COVERITY_FP(UNINIT, "psa_read() sets uid and data_offset"))
     return tfm_its_get(msg.client_id, uid, data_offset, data_size,
                        &data_length);
+    TFM_COVERITY_BLOCK_END(MISRA_C_2012_Rule_9_1 UNINIT)
 }
 
 static psa_status_t tfm_its_get_info_ipc(void)
@@ -263,8 +269,11 @@ static psa_status_t tfm_its_get_info_ipc(void)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    TFM_COVERITY_DEVIATE_LINE(MISRA_C_2012_Rule_9_1, "psa_read() handles all parameters by CPU registers")
+    TFM_COVERITY_BLOCK(TFM_COVERITY_DEVIATE(MISRA_C_2012_Rule_9_1,
+                                            "psa_read() handles all parameters by CPU registers")
+                       TFM_COVERITY_FP(UNINIT, "psa_read() sets uid"))
     status = tfm_its_get_info(msg.client_id, uid, &info);
+    TFM_COVERITY_BLOCK_END(MISRA_C_2012_Rule_9_1 UNINIT)
     if (status == PSA_SUCCESS) {
         psa_write(msg.handle, 0, &info, sizeof(info));
     }
@@ -287,8 +296,11 @@ static psa_status_t tfm_its_remove_ipc(void)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    TFM_COVERITY_DEVIATE_LINE(MISRA_C_2012_Rule_9_1, "psa_read() handles all parameters by CPU registers")
+    TFM_COVERITY_BLOCK(TFM_COVERITY_DEVIATE(MISRA_C_2012_Rule_9_1,
+                                            "psa_read() handles all parameters by CPU registers")
+                       TFM_COVERITY_FP(UNINIT, "psa_read() sets uid"))
     return tfm_its_remove(msg.client_id, uid);
+    TFM_COVERITY_BLOCK_END(MISRA_C_2012_Rule_9_1 UNINIT)
 }
 
 static void its_signal_handle(psa_signal_t signal, its_func_t pfn)

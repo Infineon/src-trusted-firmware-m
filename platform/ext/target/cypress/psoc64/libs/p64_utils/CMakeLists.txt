@@ -88,15 +88,12 @@ target_sources(${P64_UTILS_LIB_TARGET}
 target_include_directories(${P64_UTILS_LIB_TARGET}
     PUBLIC
         ${CY_P64_UTILS_LIB_PATH}
-    PRIVATE
-        ${CY_PSOC64_DIR}/Device/Include
-        ${CY_PSOC6PDL_LIB_PATH}/cmsis/include
-        ${CY_PSOC6PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
-        ${CY_PSOC6PDL_LIB_PATH}/drivers/include
 )
 
 target_link_libraries(${P64_UTILS_LIB_TARGET}
     PRIVATE
         ${CY_CORE_LIB_TARGET}
+        cy_cmsis_lib
+        ${PSOC6PDL_LIB_S_TARGET}
 )
 

@@ -108,6 +108,7 @@ static int32_t ARM_USARTx_Initialize(UARTx_Resources* uart_dev)
         uart_dev->enabled = hw_settings.uart_enabled;
     } else {
         uart_dev->enabled = false;
+	return ARM_DRIVER_ERROR;
     }
 
     if (!uart_dev->enabled) {

@@ -219,6 +219,7 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
 
+        TFM_COVERITY_FP_LINE(UNINIT, "psa_read() sets counter_id")
         if (!nv_counter_access_grant(msg->client_id, counter_id)) {
            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
@@ -236,6 +237,7 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
 
+        TFM_COVERITY_FP_LINE(UNINIT, "psa_read() sets counter_id")
         if (!nv_counter_access_grant(msg->client_id, counter_id)) {
            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
@@ -333,8 +335,11 @@ static void platform_signal_handle(psa_signal_t signal, plat_func_t pfn)
         return;
     }
 
-    TFM_COVERITY_DEVIATE_LINE(MISRA_C_2012_Rule_9_1, "psa_get() handles all parameters by CPU registers")
+    TFM_COVERITY_BLOCK(TFM_COVERITY_DEVIATE(MISRA_C_2012_Rule_9_1,
+                                            "psa_get() handles all parameters by CPU registers")
+                       TFM_COVERITY_FP(UNINIT, "psa_get() sets msg"))
     switch (msg.type) {
+    TFM_COVERITY_BLOCK_END(MISRA_C_2012_Rule_9_1 UNINIT)
     case PSA_IPC_CONNECT:
         psa_reply(msg.handle, PSA_SUCCESS);
         break;

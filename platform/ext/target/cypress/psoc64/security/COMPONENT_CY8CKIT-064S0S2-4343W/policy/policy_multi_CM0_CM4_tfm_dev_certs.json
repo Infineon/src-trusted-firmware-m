@@ -56,10 +56,10 @@
         "firmware": [
             {
                 "boot_auth": [
-                    5
+                    3
                 ],
                 "bootloader_keys": [
-                    { "kid": 5, "key": "../keys/oem_state.json" }
+                    { "kid": 3, "key": "../keys/cy_pub_key.json" }
                 ],
                 "id": 0,
                 "launch": 1,
@@ -211,7 +211,7 @@
         "device_private_key": "../keys/dev_priv_key.json",
         "cy_auth": "../packets/cy_auth_2m_s0_sample.jwt"
     },
-    "custom_data_sections": ["tfm", "extclk"],
+    "custom_data_sections": ["tfm"],
     "tfm":
     {
         "attestation_data":
@@ -246,17 +246,5 @@
             "uart_base" : 1080360960,
             "enabled" : true
         }
-    },
-    "extclk": 
-    {
-            "ecoEnable": 1,
-            "ecoFreqHz": 17203200,
-            "ecoLoad": 29,
-            "ecoEsr": 40,
-            "ecoDriveLevel": 500,
-            "ecoInPort": 12,
-            "ecoOutPort": 12,
-            "ecoInPinNum": 6,
-            "ecoOutPinNum": 7
     }
 }

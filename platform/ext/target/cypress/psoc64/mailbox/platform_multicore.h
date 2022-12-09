@@ -11,7 +11,6 @@
 #define _TFM_PLATFORM_MULTICORE_
 
 #include <stdint.h>
-#include "cy_device_headers.h"
 
 #define IPC_PSA_CLIENT_CALL_CHAN         (8)
 #define IPC_PSA_CLIENT_CALL_INTR_STRUCT  (6)
@@ -42,10 +41,6 @@
 #define PLATFORM_MAILBOX_TX_ERROR        (INT32_MIN + 2)
 #define PLATFORM_MAILBOX_RX_ERROR        (INT32_MIN + 3)
 #define PLATFORM_MAILBOX_INIT_ERROR      (INT32_MIN + 4)
-
-/* Inter-Processor Communication (IPC) data channel for the Semaphores */
-#define PLATFORM_MAILBOX_IPC_CHAN_SEMA   CY_IPC_CHAN_SEMA
-#define MAILBOX_SEMAPHORE_NUM            (16)
 
 #define IPC_SYNC_MAGIC                   (0x7DADE011UL)
 

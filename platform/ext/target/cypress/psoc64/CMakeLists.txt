@@ -21,6 +21,7 @@ set(PSOC6PDL_LIB_NS_TARGET psoc6pdl_lib_ns)
 set(P64_UTILS_LIB_TARGET   p64_utils_lib)
 
 add_subdirectory(libs/core-lib)
+add_subdirectory(libs/cmsis)
 add_subdirectory(libs/psoc6pdl)
 add_subdirectory(libs/p64_utils)
 
@@ -42,11 +43,11 @@ target_compile_definitions(platform_region_defs
 target_sources(tfm_s
     PRIVATE
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_psoc64_s.s>
-        $<$<C_COMPILER_ID:ARMClang>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_mdk.s>
+        $<$<C_COMPILER_ID:ARMClang>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_ext.s>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_psoc64_s.S>
-        $<$<C_COMPILER_ID:GNU>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S>
+        $<$<C_COMPILER_ID:GNU>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_ext.S>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_psoc64_s.s>
-        $<$<C_COMPILER_ID:IAR>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_IAR/cy_syslib_iar.s>
+        $<$<C_COMPILER_ID:IAR>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_IAR/cy_syslib_ext.s>
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -61,11 +62,11 @@ if(NS)
     target_sources(tfm_ns
         PRIVATE
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_psoc64_ns.s>
-            $<$<C_COMPILER_ID:ARMClang>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_mdk.s>
+            $<$<C_COMPILER_ID:ARMClang>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_ext.s>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_psoc64_ns.S>
-            $<$<C_COMPILER_ID:GNU>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S>
+            $<$<C_COMPILER_ID:GNU>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_ext.S>
             $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_psoc64_ns.s>
-            $<$<C_COMPILER_ID:IAR>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_IAR/cy_syslib_iar.s>
+            $<$<C_COMPILER_ID:IAR>:${CY_PSOC6PDL_LIB_PATH}/drivers/source/TOOLCHAIN_IAR/cy_syslib_ext.s>
     )
     target_add_scatter_file(tfm_ns
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/psoc6_ns.sct>
@@ -94,12 +95,8 @@ target_include_directories(platform_s
         .
         mailbox
         Device/Config
-        Device/Include
         CMSIS_Driver/Config
-        libs/watchdog
         utils
-        ${CY_PSOC6PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
-        ${CY_PSOC6PDL_LIB_PATH}/drivers/include
 )
 
 target_sources(platform_s
@@ -144,10 +141,10 @@ target_link_libraries(platform_s
     PUBLIC
         ${CY_CORE_LIB_TARGET}
         ${P64_UTILS_LIB_TARGET}
+        ${PSOC6PDL_LIB_S_TARGET}
     PRIVATE
         tfm_spm
         tfm_app_rot_partition_ps
-        ${PSOC6PDL_LIB_S_TARGET}
 )
 
 target_compile_definitions(tfm_app_rot_partition_ps
@@ -183,10 +180,7 @@ target_include_directories(platform_ns
     PUBLIC
         .
         Device/Config
-        Device/Include
         CMSIS_Driver/Config
-        ${CY_PSOC6PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
-        ${CY_PSOC6PDL_LIB_PATH}/drivers/include
 )
 
 target_compile_definitions(platform_ns
@@ -196,8 +190,9 @@ target_compile_definitions(platform_ns
 )
 
 target_link_libraries(platform_ns
-    PRIVATE
+    PUBLIC
         ${PSOC6PDL_LIB_NS_TARGET}
+    PRIVATE
         ${P64_UTILS_LIB_TARGET}
         ${CY_CORE_LIB_TARGET}
 )

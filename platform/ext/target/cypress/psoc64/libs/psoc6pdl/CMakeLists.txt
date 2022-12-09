@@ -75,3 +75,11 @@ set(CMAKE_PSOC64_DIR        ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFO
 
 add_subdirectory(psoc6pdl_s_lib)
 add_subdirectory(psoc6pdl_ns_lib)
+
+# This directory is treated as part of PDL, but isn't part of the PDL repo
+add_library(cy_pdl_platform INTERFACE)
+
+target_include_directories(cy_pdl_platform
+    INTERFACE
+        ${CMAKE_PSOC64_DIR}/Device/Include
+)

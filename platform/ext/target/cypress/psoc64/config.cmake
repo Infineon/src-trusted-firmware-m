@@ -57,20 +57,30 @@ set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the
 
 ################################## Dependencies ################################
 
-set(CY_CORE_LIB_PATH                    "DOWNLOAD"  CACHE PATH      "Path to Cypress Core library repo (or DOWNLOAD to fetch automatically")
-set(CY_CORE_LIB_GIT_REMOTE              "https://github.com/Infineon/core-lib.git"  CACHE STRING      "Cypress Core library repo URL (to fetch automatically")
-set(CY_CORE_LIB_VERSION                 "release-v1.3.0" CACHE STRING  "The version of Cypress Core library to use")
-set(CY_CORE_LIB_PATCH_DIR               "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/core-lib"
-    CACHE PATH      "Path to folder with Cypress Core library patches. Set empty string to skip patching.")
+set(CY_CORE_LIB_PATH            "DOWNLOAD"       CACHE PATH   "Path to Cypress Core library repo (or DOWNLOAD to fetch automatically)")
+set(CY_CORE_LIB_GIT_REMOTE      "https://github.com/Infineon/core-lib.git"
+    CACHE STRING "Cypress Core library repo URL (to fetch automatically)")
+set(CY_CORE_LIB_VERSION         "release-v1.3.0" CACHE STRING "The version of Cypress Core library to use")
+set(CY_CORE_LIB_PATCH_DIR       "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/core-lib"
+    CACHE PATH   "Path to folder with Cypress Core library patches. Set empty string to skip patching.")
 
-set(CY_PSOC6PDL_LIB_PATH                "DOWNLOAD"  CACHE PATH      "Path to PSOC6PDL repo (or DOWNLOAD to fetch automatically")
-set(CY_PSOC6PDL_LIB_GIT_REMOTE          "https://github.com/Infineon/mtb-pdl-cat1.git"  CACHE STRING      "PSOC6PDL library repo URL (to fetch automatically")
-set(CY_PSOC6PDL_LIB_VERSION             "release-v2.4.0" CACHE STRING  "The version of PSOC6PDL to use")
-set(CY_PSOC6PDL_LIB_PATCH_DIR           "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/psoc6pdl"
-    CACHE PATH      "Path to folder with PSOC6PDL patches. Set empty string to skip patching.")
+set(CY_CMSIS_LIB_PATH           "DOWNLOAD"       CACHE PATH   "Path to CMSIS library repo (or DOWNLOAD to fetch automatically)")
+set(CY_CMSIS_LIB_GIT_REMOTE     "https://github.com/ARM-software/CMSIS_5.git"
+    CACHE STRING "CMSIS library repo URL (to fetch automatically)")
+set(CY_CMSIS_LIB_VERSION        "5.8.0"          CACHE STRING "The version of CMSIS library to use")
+set(CY_CMSIS_LIB_PATCH_DIR      "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/cmsis-lib"
+    CACHE PATH   "Path to folder with CMSIS library patches. Set empty string to skip patching.")
 
-set(CY_P64_UTILS_LIB_PATH               "DOWNLOAD"  CACHE PATH      "Path to p64_utils repo (or DOWNLOAD to fetch automatically")
-set(CY_P64_UTILS_LIB_GIT_REMOTE         "https://github.com/Infineon/p64_utils.git"  CACHE STRING      "p64_utils library repo URL (to fetch automatically")
-set(CY_P64_UTILS_LIB_VERSION            "release-v1.0.1" CACHE STRING "The version of p64_utils to use")
-set(CY_P64_UTILS_LIB_PATCH_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/p64_utils"
-    CACHE PATH      "Path to folder with p64_utils patches. Set empty string to skip patching.")
+set(CY_PSOC6PDL_LIB_PATH        "DOWNLOAD"       CACHE PATH   "Path to PSOC6PDL repo (or DOWNLOAD to fetch automatically)")
+set(CY_PSOC6PDL_LIB_GIT_REMOTE  "https://github.com/Infineon/mtb-pdl-cat1.git"
+    CACHE STRING "PSOC6PDL library repo URL (to fetch automatically)")
+set(CY_PSOC6PDL_LIB_VERSION     "release-v3.0.0" CACHE STRING  "The version of PSOC6PDL to use")
+set(CY_PSOC6PDL_LIB_PATCH_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/psoc6pdl"
+    CACHE PATH   "Path to folder with PSOC6PDL patches. Set empty string to skip patching.")
+
+set(CY_P64_UTILS_LIB_PATH       "DOWNLOAD"       CACHE PATH   "Path to p64_utils repo (or DOWNLOAD to fetch automatically)")
+set(CY_P64_UTILS_LIB_GIT_REMOTE "https://github.com/Infineon/p64_utils.git"
+    CACHE STRING "p64_utils library repo URL (to fetch automatically)")
+set(CY_P64_UTILS_LIB_VERSION    "release-v1.0.1" CACHE STRING "The version of p64_utils to use")
+set(CY_P64_UTILS_LIB_PATCH_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/p64_utils"
+    CACHE PATH   "Path to folder with p64_utils patches. Set empty string to skip patching.")

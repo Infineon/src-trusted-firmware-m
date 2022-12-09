@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 """
-Copyright (c) 2020 Cypress Semiconductor Corporation
+Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +18,7 @@ limitations under the License.
 """
 
 import os
+from packaging import version
 import platform
 import sys, argparse
 import subprocess
@@ -24,7 +26,11 @@ import json
 from time import sleep
 
 from cysecuretools import CySecureTools
-from cysecuretools.execute.provisioning_lib.cyprov_pem import PemKey
+import cysecuretools.version
+if version.parse(cysecuretools.version.__version__) < version.parse("4.0.0"):
+    from cysecuretools.execute.provisioning_lib.cyprov_pem import PemKey
+else:
+    from cysecuretools.execute.provisioning_packet.lib.cyprov_pem import PemKey
 from OpenSSL import crypto, SSL
 from cysecuretools.execute.programmer.programmer import ProgrammingTool
 from cysecuretools.execute.programmer.base import AP
@@ -81,6 +87,13 @@ def myargs(argv):
                         help="Force to use existing set keys if defined",
                         required=False)
 
+    parser.add_argument('-u', '--unique_id_number',
+                        dest='unique_id_number',
+                        action='store',
+                        type=str,
+                        help="Device unique id number",
+                        required=False)
+
     parser.add_argument('-y',
                         dest='force_reprov',
                         action='store_true',
@@ -95,10 +108,10 @@ def create_app_keys(overwrite=None):
     cytools.create_keys(overwrite)
 
 
-def read_device_pub_key():
+def read_device_pub_key(unique_id):
     # Read Device Key and save
     print('Reading public key from device')
-    key=cytools.read_public_key(1, "jwk")
+    key=cytools.read_public_key(1, "jwk", probe_id=unique_id)
     print("key: {}".format(key))
     if not key:
         print('Error: Cannot read device public key.')
@@ -166,18 +179,18 @@ def create_provisioning_packet():
     cytools.create_provisioning_packet()
 
 
-def re_provision_device(device, policy):
-     cytools.re_provision_device()
+def re_provision_device(device, policy, unique_id):
+     cytools.re_provision_device(probe_id=unique_id)
 
 
-def erase_flash(addr, size):
-    tool = ProgrammingTool.create(cytools.PROGRAMMING_TOOL)
-    tool.connect(target_name=cytools.target_name, ap='cm0')
+def erase_flash(addr, size, unique_id):
+    tool = cytools.tool
+    tool.connect(target_name=cytools.target_name, probe_id=unique_id, ap='cm0')
     tool.set_ap(AP.CM0)
     print('Erasing address {hex(addr)}, size {hex(size)} ...')
     tool.erase(addr, size)
     print('Erasing complete\n')
-    tool.reset(ResetType.HW)
+    tool.reset_and_halt(ResetType.HW)
     sleep(3)
     tool.disconnect()
     return 0
@@ -265,6 +278,7 @@ def main(argv):
     print("Policy file:             {}".format(options.policy_file))
     print("Device:                  {}".format(options.device))
     print("Serial Number:           {}".format(dev_serial_num))
+    print("Unique ID Number:        {}".format(options.unique_id_number))
     print("Create new signing keys: {}".format(create_signing_keys))
     print("##################################################################")
     print("\r\n")
@@ -282,11 +296,11 @@ def main(argv):
         create_app_keys(overwrite=True)
 
     # invalidate SPE image in Flash so it won't run.
-    ret = erase_flash(0x10000000, 0x1000)
+    ret = erase_flash(0x10000000, 0x1000, options.unique_id_number)
     if ret != 0:
         exit(1)
 
-    ret = read_device_pub_key()
+    ret = read_device_pub_key(options.unique_id_number)
     if ret != 0:
         exit(1)
 
@@ -296,7 +310,7 @@ def main(argv):
 
     create_provisioning_packet()
 
-    re_provision_device(options.device, options.policy_file)
+    re_provision_device(options.device, options.policy_file, options.unique_id_number)
 
     exit(0)
 

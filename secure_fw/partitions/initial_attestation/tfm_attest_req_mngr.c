@@ -158,8 +158,11 @@ static void attest_signal_handle(psa_signal_t signal, attest_func_t pfn)
         return;
     }
 
-    TFM_COVERITY_DEVIATE_LINE(MISRA_C_2012_Rule_9_1, "psa_get() handles all parameters by CPU registers")
+    TFM_COVERITY_BLOCK(TFM_COVERITY_DEVIATE(MISRA_C_2012_Rule_9_1,
+                                            "psa_get() handles all parameters by CPU registers")
+                       TFM_COVERITY_FP(UNINIT, "psa_get() sets msg"))
     switch (msg.type) {
+    TFM_COVERITY_BLOCK_END(MISRA_C_2012_Rule_9_1 UNINIT)
     case PSA_IPC_CONNECT:
         psa_reply(msg.handle, PSA_SUCCESS);
         break;

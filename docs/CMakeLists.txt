@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,7 +13,7 @@ add_custom_target(docs)
 
 find_package(Python3)
 find_package(Sphinx)
-find_package(PythonModules COMPONENTS m2r sphinx-rtd-theme sphinxcontrib.plantuml)
+find_package(PythonModules COMPONENTS m2r2 sphinx-rtd-theme sphinxcontrib.plantuml)
 find_package(PlantUML)
 find_package(Doxygen 1.8.0)
 find_package(LATEX COMPONENTS PDFLATEX)
@@ -43,7 +45,7 @@ add_custom_command(OUTPUT ${SPHINX_TMP_DOC_DIR}/conf.py
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_env.py.in ${SPHINX_TMP_DOC_DIR}/tfm_env.py @ONLY)
 
-if (SPHINX_FOUND AND PLANTUML_FOUND AND PY_M2R_FOUND AND PY_SPHINX-RTD-THEME_FOUND AND PY_SPHINXCONTRIB.PLANTUML)
+if (SPHINX_FOUND AND PLANTUML_FOUND AND PY_M2R2_FOUND AND PY_SPHINX-RTD-THEME_FOUND AND PY_SPHINXCONTRIB.PLANTUML)
 
     file(GLOB_RECURSE SPHINXCFG_DOC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
 

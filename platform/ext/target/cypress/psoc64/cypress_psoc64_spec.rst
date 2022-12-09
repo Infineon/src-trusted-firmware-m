@@ -2,22 +2,31 @@
 Cypress PSoC64 Specifics
 ########################
 
+.. contents:: Table of Contents
+
+*****************
+Supported devices
+*****************
+
+For the list of supported devices refer to ``RELEASE.md`` document.
+
 *************
 Prerequisites
 *************
 
-PSoC64 must first be provisioned with SecureBoot firmware and a provisioning packet
-containing policy and secure keys. Please refer to the user guide [1]_.
-Use the following policy file for provisioning and signing:
-policy_multi_CM0_CM4_tfm.json
+Software requirements
+=====================
 
-Please make sure you have all required software installed as explained in the
-`Prerequisites <https://tf-m-user-guide.trustedfirmware.org/platform/cypress/psoc64/cypress_psoc64_spec.html#prerequisites>`_ section.
+General tools
+-------------
 
-Install CySecureTools or update it to the newest version (2.0.0 at the time of
-writing)
+Install required software as described in
+:doc:`Software requirements TF-M document </docs/getting_started/tfm_sw_requirement>`.
 
-Note: the upcoming CY SecureBoot release requires CySecuretools v2.0.0 or newer.
+CySecureTools and PyOCD
+-----------------------
+
+Install CySecureTools or update it to the newest version.
 
 .. code-block:: bash
 
@@ -26,596 +35,888 @@ Note: the upcoming CY SecureBoot release requires CySecuretools v2.0.0 or newer.
 PyOCD is installed by CySecureTools as a dependency.
 
 For more details please refer to
-`CySecureTools <https://pypi.org/project/cysecuretools>`_ page.
+`CySecureTools page <https://pypi.org/project/cysecuretools>`_.
 
-Install OpenOCD with PSoC6 support. Download the latest revision 4.1.0
-or newer from:
-https://github.com/Infineon/openocd/releases
+OpenOCD
+-------
 
-Lastly, the PSoC64 board KitProg firmware needs to be 2.00.744 or greater.
-Please use Cypress Modus Toolbox or CyProgrammer to update it if needed.
+Install OpenOCD with PSoC6 support. Download the latest version (version 4.1.0
+or newer) from
+`Infineon OpenOCD github repository <https://github.com/Infineon/openocd/releases>`_.
 
-******************************************
-Building Multi-Core TF-M with ModusToolBox
-******************************************
+Firmware loader
+---------------
 
-The trusted-firmware-m library consists of 3 components:
-    * COMPONENT_TFM_NS_INTERFACE - this component allows to build TF-M NSPE.
-    * COMPONENT_TFM_S_FW - this component contains prebuilt binaries of SPE.
-    * COMPONENT_TFM_S_SRC - this component allows to build TF-M SPE from source files via CMake.
+Download the latest version of fw-loader from
+`Infineon Firmware-loader github repository <https://github.com/Infineon/Firmware-loader/releases>`_.
 
-Note: The CM4 application uses result of CM0+ build, so CM0+ application should built firstly.
-      You can build CM0+ and CM4 applications separately.
-
-Pre-requisites for Linux
+Update board firmware
 =====================
 
-Ensure that you have installed pip & venv packages. For Ubuntu 20.04 you should install:
+PSoC64 board KitProg firmware needs to be 2.00.744 version or greater.
+Please use Modus Toolbox or CyProgrammer to update it if needed. Refer to
+`KitProg user guide <https://www.infineon.com/dgdl/Infineon-KitProg3_User_Guide-UserManual-v01_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f01221f1853>`_
+for more details.
+
+Provision the board
+===================
+
+PSoC64 must first be provisioned with SecureBoot firmware and a provisioning
+packet containing policy and secure keys. Refer to the Secure Boot SDK User
+Guide [1]_ and PSoC64 provisioning specification [2]_ for more information
+on PSoC device provisioning.
+
+Generating the keys
+-------------------
+
+There are several keys that are referenced in TF-M specific policies:
+
+    * TFM_S_KEY.json      - private OEM key for signing CM0+ image
+    * TFM_S_KEY_PRIV.pem  - private OEM key for signing CM0+ image in PEM format
+    * TFM_NS_KEY.json     - private OEM key for signing CM4 image
+    * TFM_NS_KEY_PRIV.pem - private OEM key for signing CM4 image in PEM format
+
+See `Provisioning policies`_ section for more details on TF-M specific policies.
+
+If re-provisioning is being done using `reprov_helper.py` script, new keys can
+be generated as part of the provisioning process. If you want to generate keys
+as a separate step, follow this process. Use cysecuretools to generate new key
+pairs defined by the policy file, for example:
 
 .. code-block:: bash
 
-    apt install python3-venv python3-pip
+    # Replace <name_of_the_board> with name of the used board (e.g. CY8CKIT-064S0S2-4343W)
+    BOARD_NAME=<name_of_the_board>
+    cd platform/ext/target/cypress/psoc64/security/COMPONENT_${BOARD_NAME}
+    cysecuretools -t ${BOARD_NAME} -p policy/policy_multi_CM0_CM4_tfm.json create-keys
+    # Be sure to backup keys to a safe place
 
-Adding the library
-=====================
+Signing keys have to be provisioned to the board, refer to
+`Performing provisioning`_ section for more details on device provisioning.
 
-You can add a dependency file (MTB format) under the deps folder or use the Library Manager to add it in your project.
+Performing provisioning
+-----------------------
 
-In the Makefile of the project, ensure RTOS_AWARE is an enabled component if RTOS is used.
-* COMPONENTS=RTOS_AWARE
+Depending on the policy file, board can be provisioned with or without device
+certificates and/or Amazon Web Services root certificates. To choose the policy
+that suits the needs of your project refer to the `Provisioning policies`_
+section.
 
-Using the library
-=====================
+To provision the device:
 
-Include the relevant PSA API header file and refer to `PSA API <https://github.com/ARM-software/psa-arch-tests/tree/master/api-specs>`_
+    1. Choose the needed policy file.
+    2. Optionally generate signing keys or use existing keys. Refer to
+       `Generating the keys`_ section for more details on key generation.
+    3. If not done yet, initialize cysecuretools environment in psoc64 board
+       security directory:
 
-For CM0+ Application - refer to following `CM0p example makefile <https://github.com/Infineon/trusted-firmware-m/blob/master/COMPONENT_TFM_S_SRC/make/cm0p-app-example.mk>`_
+       .. code-block:: bash
 
-This library allows to build TF-M SPE from source files via CMake.
+            # Replace <name_of_the_board> with name of the used board (e.g. CY8CKIT-064S0S2-4343W)
+            BOARD_NAME=<name_of_the_board>
+            cd platform/ext/target/cypress/psoc64/security/COMPONENT_${BOARD_NAME}
+            cysecuretools -t ${BOARD_NAME} init
 
-Optional variables to configure TF-M in Makefile:
-* TFM_GIT_URL - location of git repo with TF-M sources.
-* TFM_GIT_REF - reference to commit/branch/tag in git repo specified by $(TFM_GIT_URL).
-* TFM_PROFILE - TF-M profile.
-* TFM_ISOLATION_LEVEL - TF-M isolation level.
-* TFM_LIB_PDL - use your own version of MTB CAT1A Peripheral Driver library (mtb-pdl-cat1/psoc6pdl).
-* TFM_LIB_P64_UTILS - use your own version of PSoC64 Secure Boot Utilities Middleware library (p64_utils).
-* TFM_LIB_CY_CORE_LIB - use your own version of Cypress Core library (core-lib).
-* TFM_LIB_MBEDTLS - use your own version of Mbed TLS library (mbedtls).
-* TFM_LIB_CY_MBEDTLS_ACCELERATION - use your own version of PSoC 6 MCUs acceleration for mbedTLS library (cy-mbedtls-acceleration).
-* TFM_CONFIGURE_EXT_OPTIONS - additional options which will be appended to setup CMake configuration.
-* TFM_BUILD_DIR - location of build directory
-* TFM_COMPILE_COMMANDS_PATH - location of compile_commands.json which will be updated after CMake configuration
-* TFM_CMAKE_BUILD_TYPE - optional parameter to specify CMake build type (see CMAKE_BUILD_TYPE in CMake documentation).
-* CONFIG - TF-M make file uses this variable to define CMAKE_BUILD_TYPE if TFM_CMAKE_BUILD_TYPE is not specified. Valid arguments:
-    * Debug - debug configuration (CMAKE_BUILD_TYPE=Debug)
-    * Release - release with debug info (CMAKE_BUILD_TYPE=Release)
+    4. If used policy references certificates then create new (or copy existing)
+       certificates to ``certificates`` directory next to the
+       ``policy`` directory.
+    5. Switch the board to DAPLink mode (refer to `Switching to DAPLink mode`_
+       for more details).
+    6. Run ``reprov_helper.py`` script. If running the script with default
+       parameters, the script can be run as following:
 
+       .. code-block:: bash
 
-For CM4 Application - refer to following `CM4 example makefile <https://github.com/Infineon/trusted-firmware-m/blob/master/COMPONENT_TFM_S_SRC/make/cm4-app-example.mk>`_
+            python reprov_helper.py
 
-Edit path to TF-M Secure Application by changing ```TFM_S_APP_PATH```.
+       To get the full list of options, run the script with ``--help``
+       parameter.
+    7. Confirm selected options. When prompted for a serial number, enter the
+       board's unique serial number (digits only, e.g. 00183).
+    8. The script will ask if you want to create new signing keys.
+       Answer:
 
-Optionally edit ```TFM_S_APP_INSTALL_PATH``` to use another location of TF-M Secure Application installation directory.
+        * ``Yes`` to generate new signing keys in the keys directory.
 
-Optionally generate project specific policy and provide path to it using ```POST_BUILD_POLICY_PATH```.
+        .. danger::
 
+            Choosing ``Yes`` option will overwrite existing keys.
 
-******************************************
-Building Multi-Core TF-M on Cypress PSoC64
-******************************************
+        * ``No`` to retain and use the existing keys.
+
+       After re-provisioning, from now on any images for this board will have to
+       be signed with these keys.
+
+       .. warning::
+
+        Be sure to backup keys to a safe place.
+
+    9. The script will erase user images.
+       If used policy references device certificates, the script will read
+       device public key and create device certificates based on the board
+       serial number, root certificate and the device public key.
+
+*************************************************************
+Using Multi-Core TF-M for Cypress PSoC64 without ModusToolBox
+*************************************************************
+
+.. note::
+
+    Commands in this section are provided for reference boards. If custom
+    board is used, commands need to be adjusted to account for specifics of
+    this board.
 
 Configuring the build
 =====================
 
-The following peripheral resources could be occupied/configured by TFM, make sure there are no conflicts with NSPE application:
-* SCB5 for UART with P5_0, P5_1 accordingly.
-* TCPWM0, counter 0
-* TCPWM0, counter 1
-* 8-bit peripheral clock divider 0
-* FLL clock
-
 The build configuration for TF-M is provided to the build system using command
-line arguments. Required arguments are noted below.
+line arguments. Required arguments are noted below:
 
-   * - -DTFM_PLATFORM=cypress/psoc64
-     - Specifies target platform name ``psoc64``
+   * ``-DTFM_PLATFORM=cypress/psoc64`` - target platform name: .
+   * ``-DTFM_TOOLCHAIN_FILE=<path to toolchain file>`` - compiler toolchain
+     file. There are several toolchains supported:
 
-   * - -DTFM_TOOLCHAIN_FILE=<path to toolchain file>
-     - Specifies the compiler toolchain
-       The possible values are:
+        * ``<TF-M root dir>/toolchain_ARMCLANG.cmake``
+        * ``<TF-M root dir>/toolchain_GNUARM.cmake``
+        * ``<TF-M root dir>/toolchain_IARARM.cmake``
 
-         - ``<TFM root dir>/toolchain_ARMCLANG.cmake``
-         - ``<TFM root dir>/toolchain_GNUARM.cmake``
-         - ``<TFM root dir>/toolchain_IARARM.cmake``
-
-Optional arguments
-------------------
-
-   * - -DCY_POLICY_CONCEPT=OFF
-     - By default (CY_POLICY_CONCEPT=ON), the PSoC64 build flash layout,
-       initial attestation details, hardware version, and whether TF-M should
-       set the "image ok" flag are specified in the policy file that is used
-       to provision the device and transferred to the device itself during
-       provisioning. This allows one SPE binary to support multiple
-       configurations. In addition, the watchdog timer config, UART settings,
-       and external clock configuration may optionally be specified in the
-       provisioning data, and will use default values otherwise.
-       Setting CY_POLICY_CONCEPT to OFF will instead specify the flash layout
-       in the platform header file flash_layout.h, initial attestation details
-       and hardware version in the file attest_hal.c, whether TF-M should set
-       the "image ok" flag in the file tfm_hal_isolation.c, watchdog timer and
-       external clock config in the file spm_hal.c, and UART settings in the
-       file target_cfg.c, the same as for other platforms.
-       Internally, setting CY_POLICY_CONCEPT sets several lower-level macros,
-       CY_FLASH_LAYOUT_FROM_POLICY, CY_ATTEST_DETAILS_FROM_POLICY,
-       CY_HW_VERSION_FROM_POLICY, CY_WDT_CONFIG_FROM_POLICY,
-       CY_IMG_OK_CONFIG_FROM_POLICY, CY_HW_SETTINGS_FROM_POLICY, and
-       CY_EXTCLK_CONFIG_FROM_POLICY. These could potentially be
-       enabled/disabled independently if needed.
-
-       Note: in case you are using test suites and CY_POLICY_CONCEPT=ON,
-       please remember that test suites are not aware of policy reading.
-       So, make sure that provisioning data and values in source code
-       are the same.
-
-   * - -DCY_P64_HEAP_DATA_SIZE=<value>
-     - By default, TF-M sets aside a block of SRAM that is large enough to
-       parse the default policy provided plus a small number of additions
-       to it. If the policy used to provision the device is too large to
-       parse within this block, TF-M will fail to boot. In this case, the
-       size of this block can be increased using this option.
-
-   * - -DTFM_LINK_OPTIONS=<options list>
-     - This argument allows to add additional options to linker. See
-       `add_link_options <https://cmake.org/cmake/help/v3.15/command/add_link_options.html>`_
-       for more details how to specify options for linker.
-
-
-see `Cmake configuration <https://github.com/Infineon/src-trusted-firmware-m/blob/master/docs/getting_started/tfm_build_instruction.rst#cmake-configuration>`_ section for
-more information.
+For more details on CMake configuration arguments refer to the
+`Optional CMake configuration arguments`_ section.
 
 Build Instructions
 ==================
 
-The following instructions build multi-core TF-M without regression test suites
-in Isolation Level 1 on Linux.
-Both the compiler and the debugging type can be changed to other configurations
-listed above.
+For generic build instructions refer to
+:doc:`TF-M build instructions document </docs/getting_started/tfm_build_instruction>`
 
-.. code-block:: bash
+To build TF-M for PSoC64 first invoke CMake to configure the build, then invoke
+GNU make to compile the project.
 
-    cd <TF-M base folder>
-    cd <trusted-firmware-m folder>
+.. note::
 
-    mkdir <build folder>
-    pushd <build folder>
-    cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
-          ../
-    popd
-    cmake --build <build folder> -- -j VERBOSE=1
+    There are two ways to invoke GNU make command on build directory, the
+    results of both ways are identical, you can use preferred one:
 
-The following instructions build multi-core TF-M with regression test suites
-in Isolation Level 1 on Linux.
-Both the compiler and the debugging type can be changed to other configurations
-listed above.
+    * using GNU make command:
 
-.. code-block:: bash
+      .. code-block:: bash
 
-    cd <TF-M base folder>
-    cd <trusted-firmware-m folder>
+        cd <build folder>
+        make <GNU make options>
 
-    mkdir <build folder>
-    pushd <build folder>
-    cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
-          -DTEST_S=ON -DTEST_NS=ON \
-          ../
-    popd
-    cmake --build <build folder> -- -j VERBOSE=1
+    * using CMake command. Under the hood this will invoke GNU make command.
 
-The following instructions build multi-core TF-M with PSA API test suite for
-the attestation service in Isolation Level 1 on Linux.
-Both the compiler and the debugging type can be changed to other configurations
-listed above.
+      .. code-block:: bash
 
-.. code-block:: bash
+        cmake --build <build folder> -- <GNU make options>
 
-    cd <TF-M base folder>
-    cd <trusted-firmware-m folder>
+Here are examples of several build configurations (note that both the compiler
+and the debugging type can be changed to other configurations):
 
-    mkdir <build folder>
-    pushd <build folder>
-    cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
-          -DTEST_PSA_API=INITIAL_ATTESTATION \
-          ../
-    popd
-    cmake --build <build folder> -- -j VERBOSE=1
+    * Build multi-core TF-M at Isolation Level 1 without regression test suites:
 
-The following instructions build multi-core TF-M without regression test suites
-in Isolation Level 2 on Linux.
-Both the compiler and the debugging type can be changed to other configurations
-listed above.
+      .. code-block:: bash
 
-.. code-block:: bash
+        cd <trusted-firmware-m folder>
+        # Replace <folder_name> with the desired name of the build folder
+        BUILD_FOLDER=<folder_name>
 
-    cd <TF-M base folder>
-    cd <trusted-firmware-m folder>
+        cmake -S . -B ${BUILD_FOLDER} -G "Unix Makefiles" \
+              -DTFM_PLATFORM=cypress/psoc64 \
+              -DTFM_TOOLCHAIN_FILE=./toolchain_GNUARM.cmake
 
-    mkdir <build folder>
-    pushd <build folder>
-    cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
-          -DTFM_ISOLATION_LEVEL=2 \
-          ../
-    popd
-    cmake --build <build folder> -- -j VERBOSE=1
+        cmake --build ${BUILD_FOLDER} -- install
 
-The following instructions build multi-core TF-M with regression test suites
-in Isolation Level 2 on Linux.
-Both the compiler and the debugging type can be changed to other configurations
-listed above.
+    * Build multi-core TF-M at Isolation Level 1 with regression test suites:
 
-.. code-block:: bash
+      .. code-block:: bash
 
-    cd <TF-M base folder>
-    cd <trusted-firmware-m folder>
+        cd <trusted-firmware-m folder>
+        # Replace <folder_name> with the desired name of the build folder
+        BUILD_FOLDER=<folder_name>
 
-    mkdir <build folder>
-    pushd <build folder>
-    cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
-          -DTFM_ISOLATION_LEVEL=2 \
-          -DTEST_S=ON -DTEST_NS=ON \
-          ../
-    popd
-    cmake --build <build folder> -- -j VERBOSE=1
+        cmake -S . -B ${BUILD_FOLDER} -G "Unix Makefiles" \
+              -DTFM_PLATFORM=cypress/psoc64 \
+              -DTFM_TOOLCHAIN_FILE=./toolchain_GNUARM.cmake \
+              -DTEST_S=ON -DTEST_NS=ON
 
-The following instructions build multi-core TF-M with PSA API test suite for
-the protected storage service in Isolation Level 2 on Linux.
-Both the compiler and the debugging type can be changed to other configurations
-listed above.
+        cmake --build ${BUILD_FOLDER} -- install
 
-.. code-block:: bash
+    * Build multi-core TF-M at Isolation Level 1 with PSA API test suite for the
+      attestation service:
 
-    cd <TF-M base folder>
-    cd <trusted-firmware-m folder>
+      .. code-block:: bash
 
-    mkdir <build folder>
-    pushd <build folder>
-    cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
-          -DTFM_ISOLATION_LEVEL=2 \
-          -DTEST_PSA_API=PROTECTED_STORAGE \
-          ../
-    popd
-    cmake --build <build folder> -- -j VERBOSE=1
+        cd <trusted-firmware-m folder>
+        # Replace <folder_name> with the desired name of the build folder
+        BUILD_FOLDER=<folder_name>
 
-*******
-Signing
-*******
+        cmake -S . -B ${BUILD_FOLDER} -G "Unix Makefiles" \
+              -DTFM_PLATFORM=cypress/psoc64 \
+              -DTFM_TOOLCHAIN_FILE=./toolchain_GNUARM.cmake \
+              -DTEST_PSA_API=INITIAL_ATTESTATION
 
-###########################
-Converting axf files to hex
-###########################
+        cmake --build ${BUILD_FOLDER} -- install
 
-First, convert tfm_s.axf and tfm_ns.axf images to hex format. This also places
-resulting files one folder level up.
+    * Build multi-core TF-M at Isolation Level 2 without regression test suites:
 
-GNUARM build:
+      .. code-block:: bash
 
-.. code-block:: bash
+        cd <trusted-firmware-m folder>
+        # Replace <folder_name> with the desired name of the build folder
+        BUILD_FOLDER=<folder_name>
 
-    arm-none-eabi-objcopy -O ihex <build folder>/secure_fw/tfm_s.axf <build folder>/tfm_s.hex
-    arm-none-eabi-objcopy -O ihex <build folder>/app/tfm_ns.axf <build folder>/tfm_ns.hex
+        cmake -S . -B ${BUILD_FOLDER} -G "Unix Makefiles" \
+              -DTFM_PLATFORM=cypress/psoc64 \
+              -DTFM_TOOLCHAIN_FILE=./toolchain_GNUARM.cmake \
+              -DTFM_ISOLATION_LEVEL=2
 
-ARMCLANG build:
+        cmake --build ${BUILD_FOLDER} -- install
 
-.. code-block:: bash
+    * Build multi-core TF-M at Isolation Level 2 with regression test suites:
 
-    fromelf --i32 --output=<build folder>/tfm_s.hex <build folder>/secure_fw/tfm_s.axf
-    fromelf --i32 --output=<build folder>/tfm_ns.hex <build folder>/app/tfm_ns.axf
+      .. code-block:: bash
 
-IARARM build:
+        cd <trusted-firmware-m folder>
+        # Replace <folder_name> with the desired name of the build folder
+        BUILD_FOLDER=<folder_name>
 
-.. code-block:: bash
+        cmake -S . -B ${BUILD_FOLDER} -G "Unix Makefiles" \
+              -DTFM_PLATFORM=cypress/psoc64 \
+              -DTFM_TOOLCHAIN_FILE=./toolchain_GNUARM.cmake \
+              -DTFM_ISOLATION_LEVEL=2 \
+              -DTEST_S=ON -DTEST_NS=ON
 
-    ielftool --silent --ihex <build folder>/secure_fw/tfm_s.axf <build folder>/tfm_s.hex
-    ielftool --silent --ihex <build folder>/app/tfm_ns.axf <build folder>/tfm_ns.hex
+        cmake --build ${BUILD_FOLDER} -- install
 
-############
-Signing keys
-############
+    * Build multi-core TF-M at Isolation Level 2 with PSA API test suite for the
+      protected storage:
 
-The keys included in the repository are for reference and development only.
-DO NOT USE THESE KEYS IN ANY ACTUAL DEPLOYMENT!
+      .. code-block:: bash
 
-Note: provisioned board in SECURE state is required, otherwise refer to
-Cypress documentation [1]_ for details on the provisioning process.
+        cd <trusted-firmware-m folder>
+        # Replace <folder_name> with the desired name of the build folder
+        BUILD_FOLDER=<folder_name>
 
-If the board was previously provisioned with signing keys and policy, copy
-secure signing keys used in the board provisioning process to
-platform/ext/target/cypress/psoc64/security/keys:
+        cmake -S . -B ${BUILD_FOLDER} -G "Unix Makefiles" \
+              -DTFM_PLATFORM=cypress/psoc64 \
+              -DTFM_TOOLCHAIN_FILE=./toolchain_GNUARM.cmake \
+              -DTFM_ISOLATION_LEVEL=2 \
+              -DTEST_PSA_API=PROTECTED_STORAGE
 
-TFM_S_KEY.json
-  Private OEM key for signing CM0P image
+        cmake --build ${BUILD_FOLDER} -- install
 
-TFM_S_KEY_PRIV.pem
-  Private OEM key for signing CM0P image in PEM format
+You can use:
 
-TFM_NS_KEY.json
-  Private OEM key for signing CM4 image
+    * ``-j`` GNU make option for multithreaded build
+    * ``VERBOSE=1`` GNU make option for verbose build
 
-TFM_NS_KEY_PRIV.pem
-  Private OEM key for signing CM4 image in PEM format
-
-Alternatively, you can generate a new set of signing keys using cysecuretools
-create-keys command and provision the keys to the board, if the previously
-provisioned policy allows board's re-provisioning.
-
-Initialize cysecuretools environment:
-
-.. code-block:: bash
-
-    cd platform/ext/target/cypress/psoc64/security
-    cysecuretools -t cy8ckit-064s0s2-4343w init
-
-Generate a new set of keys:
-
-.. code-block:: bash
-
-    cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json create-keys
-
-Re-provision the new keys to the board:
-
-.. code-block:: bash
-
-    cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json re-provision-device
-
-##################
 Signing the images
-##################
+==================
 
 Sign the images using CySecureTools CLI tool.
-Note: the tool overwrites unsigned file with a signed one, it also creates an
-unsigned copy <filename>_unsigned.hex.
 
-SPE image:
+.. note::
+
+    CySecureTools overwrites the unsigned file with a signed one, it also
+    creates an unsigned copy <filename>_unsigned.hex.
+
+The following code can be used to sign the images:
 
 .. code-block:: bash
 
+    # Replace <name_of_the_board> with name of the used board (e.g. CY8CKIT-064S0S2-4343W)
+    BOARD_NAME=<name_of_the_board>
+    # Specify the name of the policy used to provision the device
+    POLICY_NAME=policy_multi_CM0_CM4_tfm.json
+    # Replace <folder_name> with the desired name of the build folder
+    BUILD_FOLDER=<folder_name>
+
+    # Sign TF-M secure image
     cysecuretools \
-    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_CM0_CM4_tfm.json \
-    --target cy8ckit-064s0s2-4343w \
+    --policy platform/ext/target/cypress/psoc64/security/COMPONENT_${BOARD_NAME}/policy/${POLICY_NAME} \
+    --target ${BOARD_NAME} \
     sign-image \
-    --hex <build folder>/bin/tfm_s.hex \
+    --hex ${BUILD_FOLDER}/bin/tfm_s.hex \
     --image-type BOOT \
     --image-id 1
 
-NSPE image:
-
-.. code-block:: bash
-
+    # Sign non-secure image
     cysecuretools \
-    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_CM0_CM4_tfm.json \
-    --target cy8ckit-064s0s2-4343w \
+    --policy platform/ext/target/cypress/psoc64/security/COMPONENT_${BOARD_NAME}/policy/${POLICY_NAME} \
+    --target ${BOARD_NAME} \
     sign-image \
-    --hex <build folder>/bin/tfm_ns.hex \
+    --hex ${BUILD_FOLDER}/bin/tfm_ns.hex \
     --image-type BOOT \
     --image-id 16
 
-* CySecureTools sign-image overwrites unsigned file with a signed one,
-  also it creates an unsigned copy _unsigned.hex.
+Signing options:
 
-* image-type option: "--image-type BOOT" creates a signed hex file with offsets
-  for the primary image slot. Use "--image-type UPGRADE" if you want to create
-  an image for the secondary "upgrade" slot.
-  When booting, CyBootloader will validate image in the secondary slot and copy
-  it to the primary boot slot.
+    * ``--image-type`` option:
 
-* image-id option: Each image has its own ID. By default, SPE image running on
-  CM0P core has ID=1, NSPE image running on CM4 core has ID=16. Refer to the
-  policy file for the actual ID's.
+        * ``--image-type BOOT`` - creates a signed hex file with offsets
+          for the primary image slot.
+        * ``--image-type UPGRADE`` - creates a signed hex file with offsets
+          for the secondary (upgrade) image slot. When booting, CyBootloader
+          will validate the image in the secondary slot and copy it to the
+          primary boot slot.
 
+    * ``--image-id`` option: Each image has its own ID. By default, secure
+      image running on CM0+ core has ``--image-id 1``, non-secure image
+      running on CM4 core has ``--image-id 16`` . Refer to the policy file
+      for the actual ID's.
 
-**********************
 Programming the Device
-**********************
+======================
 
-After building and signing, the TFM images must be programmed into flash
-memory on the PSoC64 device. There are three methods to program it.
+After building and signing, the TF-M images must be programmed into flash
+memory on the PSoC64 device. There are several methods to program the images.
 
 DAPLink mode
-============
+------------
 
-Using KitProg3 mode button, switch it to DAPLink mode.
-Mode LED should start blinking rapidly and depending on the host computer
-settings DAPLINK will be mounted as a media storage device.
-Otherwise, mount it manually.
+Switch the board to DAPLink mode (refer to `Switching to DAPLink mode`_ for more
+details).
 
-Copy tfm hex files one by one to the DAPLINK device:
+Depending on the host computer settings, ``DAPLINK`` will be mounted as a
+media storage device. Otherwise, mount it manually.
+
+Copy tfm ``.hex`` files one by one to the ``DAPLINK`` device:
 
 .. code-block:: bash
 
-    cp <build folder>/bin/tfm_ns.hex <mount point>/DAPLINK/; sync
-    cp <build folder>/bin/tfm_s.hex <mount point>/DAPLINK/; sync
+    # Replace <folder_name> with the desired name of the build folder
+    BUILD_FOLDER=<folder_name>
+    # Change <mount_point>
+    MOUNT_POINT=<mount_point>
+
+    cp ${BUILD_FOLDER}/bin/tfm_ns.hex ${MOUNT_POINT}/; sync
+    cp ${BUILD_FOLDER}/bin/tfm_s.hex ${MOUNT_POINT}/; sync
 
 OpenOCD
-=======
+-------
 
-Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK. Status LED
-should be ON and not blinking for CMSIS-DAP BULK.
+Switch the board to CMSIS-DAP BULK mode (refer to
+`Switching to CMSIS-DAP BULK mode`_ for more details).
 
-Before programming the images, erase PS partition if needed.
-This will clear all data and force PS to reformat partition.
+Choose OpenOCD config file (``OPENOCD_TARGET_CFG``) for used board:
 
-.. code-block:: bash
+    * psoc6_2m_secure.cfg for CY8CKIT-064S0S2-4343W board
+    * psoc6_2m_secure.cfg for CY8CKIT-064B0S2-4343W board
 
-    ${OPENOCD_PATH}/bin/openocd \
-            -s ${OPENOCD_PATH}/scripts \
-            -f interface/kitprog3.cfg \
-            -f target/psoc6_2m_secure.cfg \
-            -c "init; reset init" \
-            -c "flash erase_address 0x101c0000 0x10000" \
-            -c "shutdown"
+Optionally (if required) erase Protected Storage partition before programming
+the images.
 
-Note that the ``0x101C0000`` in the command above must match the PS start
-address of the secure primary image specified in the file:
+.. danger::
 
-    platform/ext/target/cypress/psoc64/partition/flash_layout.h
+    Erasing Protected Storage area will clear all data and force Protected
+    Storage to reformat partition.
 
-so be sure to change it if you change that file.
-
-To program the signed tfm_s and tfm_ns images to the device with openocd
-(assuming OPENOCD_PATH is pointing at the openocd installation directory)
-run the following commands:
+The following command can be used to erase Protected Storage partition:
 
 .. code-block:: bash
 
-    OPENOCD_PATH=<cyprogrammer dir>/openocd
-    BUILD_DIR=<build folder>
+    # Change <openocd_path> to the path to openocd folder
+    OPENOCD_PATH=<openocd_path>
+    # Replace <target_cfg_file> with config file name for used board
+    OPENOCD_TARGET_CFG=<target_cfg_file>
+    # Note that PS_START_ADDRESS and PS_SIZE values must match PS area settings
+    # from:
+    #   * policy file (if CY_POLICY_CONCEPT=ON)
+    #   * flash_layout.h (if CY_POLICY_CONCEPT=OFF)
+    PS_START_ADDRESS=0x101c0000
+    PS_SIZE=0x10000
 
     ${OPENOCD_PATH}/bin/openocd \
             -s ${OPENOCD_PATH}/scripts \
             -f interface/kitprog3.cfg \
-            -f target/psoc6_2m_secure.cfg \
+            -f target/${OPENOCD_TARGET_CFG} \
             -c "init; reset init" \
-            -c "flash write_image erase ${BUILD_DIR}/bin/tfm_s.hex" \
+            -c "flash erase_address ${PS_START_ADDRESS} ${PS_SIZE}" \
+            -c "shutdown"
+
+To program the signed ``tfm_s.hex`` and ``tfm_ns.hex`` images to the
+device with openocd run the following commands:
+
+.. code-block:: bash
+
+    # Change <openocd_path> to the path to openocd folder
+    OPENOCD_PATH=<openocd_path>
+    # Replace <target_cfg_file> with config file name for used board
+    OPENOCD_TARGET_CFG=<target_cfg_file>
+    # Replace <folder_name> with the desired name of the build folder
+    BUILD_FOLDER=<folder_name>
+
+    ${OPENOCD_PATH}/bin/openocd \
+            -s ${OPENOCD_PATH}/scripts \
+            -f interface/kitprog3.cfg \
+            -f target/${OPENOCD_TARGET_CFG} \
+            -c "init; reset init" \
+            -c "flash write_image erase ${BUILD_FOLDER}/bin/tfm_s.hex" \
             -c "shutdown"
 
     ${OPENOCD_PATH}/bin/openocd \
             -s ${OPENOCD_PATH}/scripts \
             -f interface/kitprog3.cfg \
-            -f target/psoc6_2m_secure.cfg \
+            -f target/${OPENOCD_TARGET_CFG} \
             -c "init; reset init" \
-            -c "flash write_image erase ${BUILD_DIR}/bin/tfm_ns.hex" \
+            -c "flash write_image erase ${BUILD_FOLDER}/bin/tfm_ns.hex" \
             -c "reset run"
 
 PyOCD
-=====
+-----
 
 PyOCD is installed by CySecureTools automatically. It can be used
-to program TFM images into the board.
+to program TF-M images into the board.
 
-Using KitProg3 mode button, switch to KitProg3 DAPLink mode.
-Mode LED should start blinking rapidly.
+Switch the board to DAPLink mode (refer to `Switching to DAPLink mode`_ for more
+details).
 
-Optionally, erase PS partition:
+Optionally (if required) erase Protected Storage partition before programming
+the images.
 
-.. code-block:: bash
+.. danger::
 
-    pyocd erase -b CY8CKIT-064S0S2-4343W -s 0x101c0000+0x10000
+    Erasing Protected Storage area will clear all data and force Protected
+    Storage to reformat partition.
 
-To program the signed tfm_s and tfm_ns images to the device with pyocd
-run the following commands:
-
-.. code-block:: bash
-
-    pyocd flash -b CY8CKIT-064S0S2-4343W ${BUILD_DIR}/bin/tfm_s.hex
-
-    pyocd flash -b CY8CKIT-064S0S2-4343W ${BUILD_DIR}/bin/tfm_ns.hex
-
-
-********************************
-Provisioning device certificates
-********************************
-
-1. If not done yet, change to the psoc64 security directory and initialize
-   cysecuretools environment:
+The following command can be used to erase Protected Storage partition:
 
 .. code-block:: bash
 
-    cd platform/ext/target/cypress/psoc64/security
-    cysecuretools -t cy8ckit-064s0s2-4343w init
+    # Replace <name_of_the_board> with name of the used board (e.g. CY8CKIT-064S0S2-4343W)
+    BOARD_NAME=<name_of_the_board>
+    # Note that PS_START_ADDRESS and PS_SIZE values must match PS area settings
+    # from:
+    #   * policy file (if CY_POLICY_CONCEPT=ON)
+    #   * flash_layout.h (if CY_POLICY_CONCEPT=OFF)
+    PS_START_ADDRESS=0x101c0000
+    PS_SIZE=0x10000
 
-2. Create and copy rootCA files to "certificates" directory next to the policy
-   directory (please refer to documentation of the used OS)
+    pyocd erase -b ${BOARD_NAME} -s ${PS_START_ADDRESS}+${PS_SIZE}
 
-3. Switch the board in DAPLink mode by pressing the mode button or by issuing
-   the following fw-loader command (fw-loader comes with Modus ToolBox software).
-   Mode LED should be slowly blinking:
+To program the signed ``tfm_s.hex`` and ``tfm_ns.hex`` images to the
+device with pyocd run the following commands:
+
+.. code-block:: bash
+
+    # Replace <name_of_the_board> with name of the used board (e.g. CY8CKIT-064S0S2-4343W)
+    BOARD_NAME=<name_of_the_board>
+    # Replace <folder_name> with the desired name of the build folder
+    BUILD_FOLDER=<folder_name>
+
+    pyocd flash -b ${BOARD_NAME} ${BUILD_FOLDER}/bin/tfm_s.hex
+
+    pyocd flash -b ${BOARD_NAME} ${BUILD_FOLDER}/bin/tfm_ns.hex
+
+**********************************************************
+Using Multi-Core TF-M for Cypress PSoC64 with ModusToolBox
+**********************************************************
+
+ModusToolbox TF-M library description
+=====================================
+
+`trusted-firmware-m ModusToolbox library <https://github.com/Infineon/trusted-firmware-m>`_
+provides support for TF-M in the ModusToolbox IDE. This library supports using a
+prebuilt TF-M secure binary or building it from source code using CMake.
+
+TF-M ModusToolbox library contains:
+
+    * ``COMPONENT_<BOARD_NAME>`` folders - each
+      ``COMPONENT_<BOARD_NAME>`` folder contains TF-M assets for specific
+      board. These assets are:
+
+        * ``COMPONENT_TFM_S_FW`` - contains prebuilt TF-M secure binaries.
+        * ``COMPONENT_TFM_NS_INTERFACE`` - contains public interface of TF-M
+          secure prebuilt binary. Allows building TF-M non-secure binary when
+          prebuilt TF-M secure binary is used.
+
+    * ``COMPONENT_TFM_S_SRC`` - allows building TF-M secure binary from
+      source files in ModusToolbox using CMake.
+    * ``export`` folder - when library is added to the project content of
+      this folder will be exported (copied) to the project.
+      ``export`` folder contains:
+
+        * ``COMPONENT_<BOARD_NAME>`` folders - each
+          ``COMPONENT_<BOARD_NAME>`` folder contains policies for specific
+          board and reference keys.
+        * ``reprov_helper.py`` python script - can be used to simplify
+          provisioning/re-provisioning process.
+
+Pre-requisites for Linux
+========================
+
+Build of TF-M secure binary in ModusToolbox on Linux requires following
+software:
+
+    * ``pip`` and ``venv`` python packages.
+      For Ubuntu 20.04 the required python modules can be installed using
+      following command:
+
+      .. code-block:: bash
+
+        apt install python3-venv python3-pip
+
+Adding the library
+==================
+
+TF-M library can be added to ModusToolbox project using Library Manager or by
+adding a dependency file (in ``.mtb``` format) under the ``deps/``
+folder. Refer to
+`ModusToolbox Library Manager user guide <https://www.infineon.com/dgdl/Infineon-ModusToolbox_Library_Manager_User_Guide_(Version_1.30)-Software-v01_00-EN.pdf?fileId=8ac78c8c7e7124d1017ed95a57ac35af&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-files>`_
+for more details.
+
+Using the library
+=================
+
+TF-M secure binary in ModusToolBox can be either used as prebuilt binary which
+is shipped in ModusToolbox TF-M library or can be built from source code.
+
+Using prebuilt TF-M secure binary
+---------------------------------
+
+To use prebuilt TF-M secure binary:
+
+    * add ``COMPONENT_<BOARD_NAME>`` and ``COMPONENT_TFM_NS_INTERFACE``
+      to the CM4 application Makefile components list.
+      Example:
+
+      .. code-block:: makefile
+
+        COMPONENTS+=<BOARD_NAME> TFM_NS_INTERFACE
+
+    * if RTOS is used ensure that ``COMPONENT_RTOS_AWARE`` component is
+      added to the components list in CM4 project Makefile.
+      Example:
+
+      .. code-block:: makefile
+
+        COMPONENTS+=RTOS_AWARE
+
+    * include relevant PSA API header in your CM4 application (refer to
+      `PSA API specification <https://github.com/ARM-software/psa-arch-tests/tree/master/api-specs>`_
+      for more details).
+
+Building TF-M secure binary from source code
+--------------------------------------------
+
+To build TF-M secure binary from source code:
+
+    * create ModusToolbox project. This project will be used to build TF-M
+      secure binary from source code for CM0+ core.
+    * edit CM0+ project Makefile. Refer to the
+      `CM0+ example makefile <https://github.com/Infineon/trusted-firmware-m/blob/master/COMPONENT_TFM_S_SRC/make/cm0p-app-example.mk>`_
+      for more details.
+    * edit CM4 project Makefile. Refer to the
+      `CM4 example makefile <https://github.com/Infineon/trusted-firmware-m/blob/master/COMPONENT_TFM_S_SRC/make/cm4-app-example.mk>`_
+      for more details.
+    * edit path to TF-M Secure Application by changing ``TFM_S_APP_PATH``
+      variable in CM4 application makefile. ``TFM_S_APP_PATH`` should point
+      to CM0+ project.
+    * optionally generate project specific policy and provide path to it in CM4
+      application Makefile using ``POST_BUILD_POLICY_PATH`` variable.
+    * include relevant PSA API header in your CM4 application (refer to
+      `PSA API specification <https://github.com/ARM-software/psa-arch-tests/tree/master/api-specs>`_
+      for more details).
+
+.. note::
+
+    When building TF-M from source code in ModusToolbox, the CM4 application
+    uses artifacts from the CM0+ build, so the CM0+ binary should built first.
+    CM0+ and CM4 applications can be built separately.
+
+CM0+ makefile optional variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Optional variables to configure TF-M in CM0+ Makefile:
+
+    * ``TFM_GIT_URL`` - location of git repo with TF-M sources.
+    * ``TFM_GIT_REF`` - reference to commit/branch/tag in git repo specified by
+      $(TFM_GIT_URL).
+    * ``TFM_PROFILE`` - TF-M profile.
+    * ``TFM_ISOLATION_LEVEL`` - TF-M isolation level.
+    * ``TFM_LIB_PDL`` - allows to specify path to MTB CAT1A Peripheral Driver
+      library (psoc6pdl).
+    * ``TFM_LIB_P64_UTILS`` - allows to specify path to PSoC64 Secure Boot
+      Utilities Middleware library (p64_utils).
+    * ``TFM_LIB_CY_CORE_LIB`` - allows to specify path to Cypress Core library
+      (core-lib).
+    * ``TFM_LIB_MBEDTLS`` - allows to specify path to Mbed TLS library
+      (mbedtls).
+    * ``TFM_LIB_CY_MBEDTLS_ACCELERATION`` - allows to specify path to PSoC 6
+      MCUs acceleration for mbedTLS library (cy-mbedtls-acceleration).
+    * ``TFM_CONFIGURE_EXT_OPTIONS`` - additional options which will be appended
+      to setup CMake configuration.
+    * ``TFM_BUILD_DIR`` - location of build directory
+    * ``TFM_COMPILE_COMMANDS_PATH`` - location of ``compile_commands.json``
+      which will be updated after CMake configuration.
+    * ``TFM_CMAKE_BUILD_TYPE`` - optional parameter to specify CMake build type
+      (see ``CMAKE_BUILD_TYPE`` in CMake documentation).
+    * ``CONFIG`` - TF-M make file uses this variable to define
+      ``CMAKE_BUILD_TYPE`` if ``TFM_CMAKE_BUILD_TYPE`` is not specified.
+      Valid arguments are:
+
+        * ``Debug`` - debug configuration (``CMAKE_BUILD_TYPE=Debug``)
+        * ``Release`` - release with debug info (``CMAKE_BUILD_TYPE=RelWithDebInfo``)
+
+***********************************
+PSoC64 specific TF-M implementation
+***********************************
+
+Provisioning policies
+=====================
+
+Default PSoC64 provisioning policies were changed to suit TF-M needs. Several
+sections have been modified (e.g. image slots locations and sizes) and custom
+``tfm`` section was added to the policy files. For more details on TF-M
+policy file fields and their usage refer to the description of
+``CY_POLICY_CONCEPT`` CMake variable in
+`Optional CMake configuration arguments`_ section.
+
+``platform/ext/target/cypress/psoc64/security`` folder contains several
+``COMPONENT_<BOARD_NAME>`` subfolders, each ``COMPONENT_<BOARD_NAME>``
+folder contains several policy templates for the specific board. Policy
+templates can be used as is or modified to suit application specific needs.
+
+The following policy templates are provided:
+
+    * ``policy_multi_CM0_CM4_tfm.json`` - demonstrates the usage of all TF-M
+      specific policy fields. Can be used for generic applications.
+    * ``policy_multi_CM0_CM4_tfm_dev_certs.json`` - extends the
+      ``policy_multi_CM0_CM4_tfm.json`` with chain of trust certificates.
+      Can be used when application requires certificates provisioning (e.g.
+      Amazon cloud connectivity applications).
+    * ``policy_multi_CM0_CM4_tfm_dev_certs_extclk.json`` - extends the
+      ``policy_multi_CM0_CM4_tfm_dev_certs.json`` with external clock
+      configurations. Can be used when application requires usage of external
+      clocks sources.
+
+All these policies have the RMA behavior set to erase the customer fuses, the
+flash areas used for non-volatile counters and by the ITS and PS partitions,
+and the non-secure image in flash. If the locations or sizes of these regions
+are changed, the corresponding rma attributes should also be updated to correspond.
+
+For more information about policies refer to the Secure Boot SDK User Guide [1]_
+and PSoC64 provisioning specification [2]_.
+
+TF-M reserved hardware resources
+================================
+
+The following peripheral resources could be occupied/configured by TF-M, make
+sure there are no conflicts with non-secure application:
+
+    * SCB5 for UART logging with P5_0, P5_1 pins for rx and tx lines accordingly.
+    * TCPWM0 counter 0 for secure tests. Only used if secure tests are built.
+    * TCPWM0 counter 1 for non-secure tests. Only used if non-secure tests
+      are built.
+    * 8-bit peripheral clock divider 1 and FLL clock are used by TF-M occupied
+      peripherals. If TF-M does not occupy any peripherals then clock divider
+      and FLL clock are not used.
+    * IPC channels 8, 9 and 10 (and corresponding interrupts) for communication
+      between non-secure (CM4) binary and secure TF-M (CM0+) binary.
+
+Optional CMake configuration arguments
+======================================
+
+Apart from the general TF-M CMake configuration arguments that are described in
+:doc:`CMake configuration TF-M document </docs/getting_started/tfm_build_instruction>`
+there are several PSoC specific TF-M CMake configuration arguments:
+
+    * Provisioned policy parsing. Can be turned ON/OFF by changing the value of
+      ``CY_POLICY_CONCEPT`` CMake variable. By default
+      ``CY_POLICY_CONCEPT=ON``.
+
+      Having ``CY_POLICY_CONCEPT=ON`` allows one secure TF-M binary to
+      support multiple configurations. When ``CY_POLICY_CONCEPT=ON``
+      following information may/must be specified in the policy file that is
+      used to provision the device:
+
+        * Mandatory information:
+
+            * PSoC64 build flash layout
+            * initial attestation details
+            * hardware version
+            * whether TF-M should set the "image ok" flag
+
+        * Optional information. If not provided TF-M will use default values:
+
+            * watchdog timer config
+            * UART settings.
+
+              .. warning::
+                In current implementation ``"uart_base"`` in policy file is
+                used only for verification. Setting ``"uart_base"`` in
+                policy file to values other than ``1080360960`` will result
+                in a failure at run-time.
+
+            * external clock configuration
+            * debugger acquisition time
+            * CM4 debug permissions
+
+      .. warning::
+        In case you are using test suites and ``CY_POLICY_CONCEPT=ON``,
+        please remember that test suites are not aware of policy reading.
+        So, make sure that provisioning data and values in source code
+        are the same.
+
+      Setting ``CY_POLICY_CONCEPT=OFF`` will make it so TF-M does not use
+      information from provisioned policy, but instead will use values from the
+      source code. The following details are used from source code:
+
+        * flash layout from the ``flash_layout.h`` platform header file
+        * initial attestation details and hardware version from the
+          ``attest_hal.c`` file
+        * whether TF-M should set the "image ok" flag from the
+          ``tfm_hal_isolation.c`` file
+        * watchdog timer and external clock configuration from the
+          ``spm_hal.c`` file
+        * UART settings from the ``target_cfg.c`` file
+
+      Internally, setting ``CY_POLICY_CONCEPT`` sets several lower-level
+      macros, which potentially could be enabled/disabled independently if
+      needed:
+
+        * ``CY_FLASH_LAYOUT_FROM_POLICY``
+        * ``CY_ATTEST_DETAILS_FROM_POLICY``
+        * ``CY_HW_VERSION_FROM_POLICY``
+        * ``CY_WDT_CONFIG_FROM_POLICY``
+        * ``CY_IMG_OK_CONFIG_FROM_POLICY``
+        * ``CY_HW_SETTINGS_FROM_POLICY``
+        * ``CY_EXTCLK_CONFIG_FROM_POLICY``
+
+    * p64_utils heap size can be changed by changing the value of
+      ``-DCY_P64_HEAP_DATA_SIZE=<value>`` CMake variable.
+
+      By default, TF-M sets aside a block of SRAM that is large enough to
+      parse the default policy provided plus a small number of additions
+      to it. If the policy used to provision the device is too large to
+      parse within this block, TF-M will fail to boot. In this case, the
+      size of this block can be increased using this option.
+
+    * Additional linker options can be added using
+      ``-DTFM_LINK_OPTIONS=<options list>`` CMake variable. See
+      `add_link_options <https://cmake.org/cmake/help/v3.15/command/add_link_options.html>`_
+      for more details how to specify options for the linker.
+
+      .. note::
+        The linker files included with TF-M must be generic to handle all
+        common use cases. Your project may not use every section defined in the
+        linker files. In that case you may see the warnings during the build
+        process using ARM clang toolchain:
+        ``L6329W (pattern only matches removed unused sections).``
+        In your project, you can suppress the warning by passing the
+        ``-DTFM_LINK_OPTIONS=--diag_suppress=6329`` option to the linker.
+
+    * Support of Protected Storage OEM UIDs can be turned ON/OFF by changing the
+      value of ``TFM_ENABLE_PS_OEM_UID`` CMake variable. Refer to
+      `Protected Storage OEM UIDs`_ section for more details on PS OEM UIDs.
+
+Protected Storage changes
+=========================
+
+Protected Storage OEM UIDs
+--------------------------
+
+TF-M Protected Storage for PSoC64 devices was extended with optional OEM UIDs
+functionality. This functionality supports retrieving provisioned policy
+certificates from PSoC Flash Boot using TF-M Protected Storage service.
+
+To retrieve provisioned certificate you can call ``tfm_ps_get()`` function
+with ``uid=<ps_certificate_id>``. For details on certificate IDs refer to
+the (``CY_P64_POLICY_CERTIFICATE``) section of
+`p64_utils cy_p64_get_provisioning_details() function documentation <https://infineon.github.io/p64_utils/p64_utils_api_reference_manual/html/group__syscalls__api.html#ga0797f0d30bfbdbb9e18f17154f008864>`_.
+
+.. warning::
+    Certificate IDs are offset to improve PS compatibility. Use following
+    code to convert Flash Boot certificate ID to TF-M Protected Storage id:
+
+    .. code-block:: c
+
+        ps_certificate_id = fb_certificate_id - CY_FB_CERTIFICATE_POLICY_ID_MIN + TFM_PS_OEM_UID_MIN
+
+OEM UIDs functionality can be disabled using ``TFM_ENABLE_PS_OEM_UID`` CMake
+variable. Refer to `Optional CMake configuration arguments`_ section for more
+details.
+
+Move of PS to PSA RoT
+---------------------
+
+In TF-M for PSoC devices Protected storage partition was moved from Application
+to PSA Root of Trust. This change was necessary because of Protected Storage
+dependency on p64_utils library global data, which is linked to PSA RoT domain.
+
+Changing KitProg3 modes
+=======================
+
+Switching to DAPLink mode
+-------------------------
+
+To switch the board to DAPLink press the ``MODE SELECT`` button or issue the
+following fw-loader command:
 
 .. code-block:: bash
 
     fw-loader --mode kp3-daplink
 
-4. Run reprov_helper.py. If running the script with default parameters,
-   the script can be run as is:
+When device is in DAPLink "Mode LED" should be slowly (1 Hz) blinking.
+
+Switching to CMSIS-DAP BULK mode
+--------------------------------
+
+To switch the board to CMSIS-DAP BULK mode press the ``MODE SELECT`` button
+or issue the following fw-loader command:
 
 .. code-block:: bash
 
-    python3 reprov_helper.py
+    fw-loader --mode kp3-bulk
 
-   Otherwise, run it with --help parameter to get the full list of options.
+When device is in CMSIS-DAP BULK "Mode LED" should be ON and not blinking.
 
-5. Confirm selected options. When prompted for a serial number, enter the board
-   unique serial number (digits only, e.g. 00183).
+*************************************
+Porting TF-M to a custom PSoC64 board
+*************************************
 
-6. Script will ask if you want to create new signing keys. Answer Yes to
-   generate new signing keys in the keys directory, or No to retain and use the
-   existing keys. After re-provisioning, from now on any images for
-   this board will have to be signed with these keys.
+By default TF-M supports several reference boards (refer to
+`RELEASE.md <https://github.com/Infineon/trusted-firmware-m/blob/master/RELEASE.md>`_
+for the list of supported boards).
 
-7. The script will erase user images.
-   Then the script will read device public key and create device certificates
-   based on the board serial number, root certificate and the device public key.
+This section describes how TF-M can be ported to a custom board which is based
+on one of the reference board`s MCUs.
 
+To port TF-M to a custom board:
 
-*************************************************************
-Provisioning Amazon Web Services root and device certificates
-*************************************************************
-Device running Amazon FreeRTOS and using Amazon Web Services (AWS)
-requires AWS root and unique device certificate signed with the device key
-for authentication. These certificates have to be provisioned into device.
-The process is the following:
+    1. Select reference board which is based on the same MCU as the custom board.
+    2. Port policy files. To do this:
 
-1. If not done yet, change to the psoc64 security directory and initialize
-   cysecuretools environment:
+        1. Copy TF-M policy files templates from the reference board folder to
+           location of your choice. More information on policy files templates
+           for reference boards can be found in `Provisioning policies`_ section.
+        2. Update policy files to suit the needs of your project.
 
-.. code-block:: bash
+    3. If peripherals assignment on the custom board is different from the
+       reference board - update hardware details (e.g pins, ports, interrupt
+       lines) for the peripherals that are used by TF-M. For more information on
+       peripherals that are used by TF-M refer to
+       `TF-M reserved hardware resources`_ section. For more information on
+       hardware details locations refer to ``CY_POLICY_CONCEPT`` CMake variable
+       description in `Optional CMake configuration arguments`_ section.
 
-    cd platform/ext/target/cypress/psoc64/security
-    cysecuretools -t cy8ckit-064s0s2-4343w init
+       .. warning::
 
-2. Obtain and copy rootCA files to  "certificates" directory next to the policy
-   directory (please refer to AWS documentation)
+            If ``CY_POLICY_CONCEPT`` is ``ON`` make sure to update hardware
+            details in policy files.
 
-3. Switch the board in DAPLink mode by pressing the mode button or by issuing
-   the following fw-loader command (fw-loader comes with Modus ToolBox software).
-   Mode LED should be slowly blinking:
-
-.. code-block:: bash
-
-    fw-loader --mode kp3-daplink
-
-4. Run reprov_helper.py. If running the script with default parameters,
-   the script can be run as is:
-
-.. code-block:: bash
-
-    python3 reprov_helper.py
-
-   Otherwise, run it with --help parameter to get the full list of options.
-
-5. Confirm selected options. When prompted for a serial number, enter the board
-   unique serial number (digits only, e.g. 00183).
-
-6. Script will ask if you want to create new signing keys. Answer Yes to
-   generate new signing keys in the keys directory, or No to retain and use the
-   existing keys. After re-provisioning, from now on any images for
-   this board will have to be signed with these keys.
-
-7. The script will erase user images.
-   Then the script will read device public key and create device certificates
-   based on the board serial number, root certificate and the device public key.
+    4. Use custom policies to provision the device and image signing. For
+       more details on device provisioning refer to `Provision the board`_
+       section and for more details on image signing refer to
+       `Signing the images`_ section.
 
 *********
 Reference
 *********
 
 .. [1] `Secure Boot: SDK User Guide <https://www.infineon.com/dgdlac/Infineon-PSoC_64_Secure_MCU_Secure_Boot_SDK_User_Guide-Software-v07_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f8c361a7666&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-software>`_
+.. [2] `PSoC64 provisioning specification <https://www.infineon.com/dgdl/Infineon-PSoC_64_provisioning_specification-Programming%20Specifications-v02_00-EN.pdf?fileId=8ac78c8c7ddc01d7017ddd02670f58f8>`_
 
 --------------
 

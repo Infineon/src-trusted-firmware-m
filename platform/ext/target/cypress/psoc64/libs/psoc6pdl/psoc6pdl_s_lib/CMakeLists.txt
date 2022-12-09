@@ -64,13 +64,14 @@ target_sources(${PSOC6PDL_LIB_S_TARGET}
 
 target_include_directories(${PSOC6PDL_LIB_S_TARGET}
     PUBLIC
-        ${CY_PSOC6PDL_LIB_PATH}/cmsis/include
         ${CY_PSOC6PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
         ${CY_PSOC6PDL_LIB_PATH}/drivers/include
-        ${CMAKE_PSOC64_DIR}/Device/Include
 )
 
 target_link_libraries(${PSOC6PDL_LIB_S_TARGET}
+    PUBLIC
+        cy_pdl_platform
+        cy_cmsis_lib
     PRIVATE
         ${CY_CORE_LIB_TARGET}
 )

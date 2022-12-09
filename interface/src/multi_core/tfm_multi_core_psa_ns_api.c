@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +12,7 @@
 
 #include "psa/client.h"
 #include "psa/error.h"
+#include "static_checks.h"
 #include "tfm_api.h"
 #include "tfm_ns_mailbox.h"
 
@@ -43,6 +46,7 @@ uint32_t psa_framework_version(void)
     uint32_t version;
     int32_t ret;
 
+    TFM_COVERITY_FP_LINE(UNINIT, "params is never read in the SPE for this operation")
     ret = tfm_ns_mailbox_client_call(MAILBOX_PSA_FRAMEWORK_VERSION,
                                      &params, NON_SECURE_CLIENT_ID,
                                      (int32_t *)&version);

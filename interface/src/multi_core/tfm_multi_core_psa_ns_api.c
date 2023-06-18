@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -42,7 +42,7 @@
 
 uint32_t psa_framework_version(void)
 {
-    struct psa_client_params_t params;
+    struct psa_client_params_t params = {0};
     uint32_t version;
     int32_t ret;
 

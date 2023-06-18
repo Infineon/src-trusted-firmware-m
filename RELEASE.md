@@ -25,6 +25,12 @@ for an additional description of the TF-M software.
 
 ## Changelog
 
+### v1.3.110
+* Added GCC11 support
+* Fixed build of p64_utils for non-secure image with cmake (non ModusToolbox)
+* Fixed build of TRNG driver for PDL v3.2.0 and upward
+* Fix TFM_LINK_SET_RW_IN_PARTITION_SECTION for IAR
+
 ### v1.3.100
 * Changed TF-M ModusToolbox library structure to support ModusToolbox 3.0
   (this library is incompatible with ModusToolbox 2.4 or earlier)
@@ -90,7 +96,7 @@ for an additional description of the TF-M software.
 ## Supported Platforms
 This library and its features are supported on the following Cypress platforms:
 * [PSoC® 64 Standard Secure - AWS Wi-Fi BT Pioneer Kit (CY8CKIT-064S0S2-4343W)](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064s0s2-4343w)
-* [PSoC® 64 "Secure Boot” Wi-Fi BT Pioneer Kit (CY8CKIT-064B0S2-4343W)](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064b0s2-4343w)
+* [PSoC® 64 "Secure Boot" Wi-Fi BT Pioneer Kit (CY8CKIT-064B0S2-4343W)](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-064b0s2-4343w)
 
 ## Supported Software and Tools
 This version of TF-M was validated for compatibility with the following Software and Tools:

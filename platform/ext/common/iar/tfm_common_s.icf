@@ -120,6 +120,8 @@ define block TFM_APP_RW_STACK_START with alignment = 32, size = 0 { };
 
     define block TFM_APP_ROT_LINKER_DATA with alignment = 32 {
         rw object *tfm_app_rot_partition*,
+        section TFM_*_APP-ROT_ATTR_RW object *.o,
+        section TFM_*_APP-ROT_ATTR_ZI object *.o,
     };
 
 
@@ -170,6 +172,8 @@ define block TFM_PSA_RW_STACK_START with alignment = 32, size = 0 { };
 
     define block TFM_PSA_ROT_LINKER_DATA with alignment = 32 {
         rw object *tfm_psa_rot_partition*,
+        section TFM_*_PSA-ROT_ATTR_RW object *.o,
+        section TFM_*_PSA-ROT_ATTR_ZI object *.o,
     };
 
 

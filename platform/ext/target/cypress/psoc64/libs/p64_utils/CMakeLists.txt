@@ -64,15 +64,21 @@ project("Cypress PSoC64 Utils Library" LANGUAGES C ASM)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
-if (NOT DEFINED P64_UTILS_LIB_TARGET)
-    set(P64_UTILS_LIB_TARGET p64_utils_lib)
+if (NOT DEFINED P64_UTILS_LIB_S_TARGET)
+    set(P64_UTILS_LIB_S_TARGET p64_utils_lib_s)
+endif()
+
+if (NOT DEFINED P64_UTILS_LIB_NS_TARGET)
+    set(P64_UTILS_LIB_NS_TARGET p64_utils_lib_ns)
 endif()
 
 add_definitions(-DCY_P64_FREE_WIPED)
 
-add_library(${P64_UTILS_LIB_TARGET} STATIC)
+#=================================== Secure ===================================#
 
-target_sources(${P64_UTILS_LIB_TARGET}
+add_library(${P64_UTILS_LIB_S_TARGET} STATIC)
+
+target_sources(${P64_UTILS_LIB_S_TARGET}
     PRIVATE
         ${CY_P64_UTILS_LIB_PATH}/cy_p64_base64.c
         ${CY_P64_UTILS_LIB_PATH}/cy_p64_cJSON.c
@@ -85,15 +91,43 @@ target_sources(${P64_UTILS_LIB_TARGET}
         ${CY_P64_UTILS_LIB_PATH}/cy_p64_psacrypto.c
 )
 
-target_include_directories(${P64_UTILS_LIB_TARGET}
+target_include_directories(${P64_UTILS_LIB_S_TARGET}
     PUBLIC
         ${CY_P64_UTILS_LIB_PATH}
 )
 
-target_link_libraries(${P64_UTILS_LIB_TARGET}
+target_link_libraries(${P64_UTILS_LIB_S_TARGET}
     PRIVATE
         ${CY_CORE_LIB_TARGET}
         cy_cmsis_lib
         ${PSOC6PDL_LIB_S_TARGET}
 )
 
+#================================= Non-Secure =================================#
+
+add_library(${P64_UTILS_LIB_NS_TARGET} STATIC)
+
+target_sources(${P64_UTILS_LIB_NS_TARGET}
+    PRIVATE
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_base64.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_cJSON.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_jwt_policy.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_malloc.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_syscalls.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_syscall.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_watchdog.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_image.c
+        ${CY_P64_UTILS_LIB_PATH}/cy_p64_psacrypto.c
+)
+
+target_include_directories(${P64_UTILS_LIB_NS_TARGET}
+    PUBLIC
+        ${CY_P64_UTILS_LIB_PATH}
+)
+
+target_link_libraries(${P64_UTILS_LIB_NS_TARGET}
+    PRIVATE
+        ${CY_CORE_LIB_TARGET}
+        cy_cmsis_lib
+        ${PSOC6PDL_LIB_NS_TARGET}
+)

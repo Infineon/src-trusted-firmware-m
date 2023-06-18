@@ -16,9 +16,10 @@ set(CY_PSOC64_DIR               ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(CY_CORE_LIB_TARGET cy_core_lib)
 # Note: the `psoc6pdl` will resolve CY_PSOC6PDL_LIB_PATH
-set(PSOC6PDL_LIB_S_TARGET  psoc6pdl_lib_s)
-set(PSOC6PDL_LIB_NS_TARGET psoc6pdl_lib_ns)
-set(P64_UTILS_LIB_TARGET   p64_utils_lib)
+set(PSOC6PDL_LIB_S_TARGET   psoc6pdl_lib_s)
+set(PSOC6PDL_LIB_NS_TARGET  psoc6pdl_lib_ns)
+set(P64_UTILS_LIB_S_TARGET  p64_utils_lib_s)
+set(P64_UTILS_LIB_NS_TARGET p64_utils_lib_ns)
 
 add_subdirectory(libs/core-lib)
 add_subdirectory(libs/cmsis)
@@ -140,7 +141,7 @@ target_compile_definitions(platform_s
 target_link_libraries(platform_s
     PUBLIC
         ${CY_CORE_LIB_TARGET}
-        ${P64_UTILS_LIB_TARGET}
+        ${P64_UTILS_LIB_S_TARGET}
         ${PSOC6PDL_LIB_S_TARGET}
     PRIVATE
         tfm_spm
@@ -193,7 +194,7 @@ target_link_libraries(platform_ns
     PUBLIC
         ${PSOC6PDL_LIB_NS_TARGET}
     PRIVATE
-        ${P64_UTILS_LIB_TARGET}
+        ${P64_UTILS_LIB_NS_TARGET}
         ${CY_CORE_LIB_TARGET}
 )
 

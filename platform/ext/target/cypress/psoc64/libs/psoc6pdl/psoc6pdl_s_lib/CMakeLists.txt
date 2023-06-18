@@ -57,10 +57,23 @@ target_sources(${PSOC6PDL_LIB_S_TARGET}
         ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_mem_v2.c
         ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_sha_v1.c
         ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_sha_v2.c
-        ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_trng_v1.c
-        ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_trng_v2.c
         ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_vu.c
 )
+
+if (EXISTS ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_trng.c)
+    # cy_crypto_core_trng.c is used starting from v3.2.0
+    target_sources(${PSOC6PDL_LIB_S_TARGET}
+        PRIVATE
+            ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_trng.c
+    )
+else()
+    # Following files are used up to v3.1.0
+    target_sources(${PSOC6PDL_LIB_S_TARGET}
+        PRIVATE
+            ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_trng_v1.c
+            ${CY_PSOC6PDL_LIB_PATH}/drivers/source/cy_crypto_core_trng_v2.c
+    )
+endif()
 
 target_include_directories(${PSOC6PDL_LIB_S_TARGET}
     PUBLIC

@@ -15,7 +15,7 @@
  */
 #define VERSION_MAJOR    1
 #define VERSION_MINOR    3
-#define VERSION_HOTFIX   100
+#define VERSION_HOTFIX   110
 #define VERSION_STRING   ""
 
 #define VERSTR(x)      #x

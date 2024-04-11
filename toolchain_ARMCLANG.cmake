@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Arm Limited. All rights reserved.
-# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -72,6 +72,8 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6314
         # Duplicate input files
         --diag_suppress=6304
+        # Pattern only matches removed unused sections.
+        --diag_suppress=6329
         $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=softvfp>
         ${TFM_LINK_OPTIONS}
     )
@@ -126,7 +128,7 @@ macro(tfm_toolchain_reload_compiler)
 
     include(Compiler/ARMClang)
     __compiler_armclang(C)
-    include(Compiler/ARMCC)
+    include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
 
     # Cmake's armclang support will set either mcpu or march, but march gives

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
- * Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2020-2024 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -15,7 +15,7 @@
  */
 #define VERSION_MAJOR    1
 #define VERSION_MINOR    3
-#define VERSION_HOTFIX   110
+#define VERSION_HOTFIX   120
 #define VERSION_STRING   ""
 
 #define VERSTR(x)      #x

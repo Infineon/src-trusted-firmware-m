@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
-# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -60,7 +60,7 @@ set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the
 set(CY_CORE_LIB_PATH            "DOWNLOAD"       CACHE PATH   "Path to Cypress Core library repo (or DOWNLOAD to fetch automatically)")
 set(CY_CORE_LIB_GIT_REMOTE      "https://github.com/Infineon/core-lib.git"
     CACHE STRING "Cypress Core library repo URL (to fetch automatically)")
-set(CY_CORE_LIB_VERSION         "release-v1.3.0" CACHE STRING "The version of Cypress Core library to use")
+set(CY_CORE_LIB_VERSION         "release-v1.4.1" CACHE STRING "The version of Cypress Core library to use")
 set(CY_CORE_LIB_PATCH_DIR       "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/core-lib"
     CACHE PATH   "Path to folder with Cypress Core library patches. Set empty string to skip patching.")
 
@@ -74,7 +74,7 @@ set(CY_CMSIS_LIB_PATCH_DIR      "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target
 set(CY_PSOC6PDL_LIB_PATH        "DOWNLOAD"       CACHE PATH   "Path to PSOC6PDL repo (or DOWNLOAD to fetch automatically)")
 set(CY_PSOC6PDL_LIB_GIT_REMOTE  "https://github.com/Infineon/mtb-pdl-cat1.git"
     CACHE STRING "PSOC6PDL library repo URL (to fetch automatically)")
-set(CY_PSOC6PDL_LIB_VERSION     "release-v3.0.0" CACHE STRING  "The version of PSOC6PDL to use")
+set(CY_PSOC6PDL_LIB_VERSION     "release-v3.9.0" CACHE STRING  "The version of PSOC6PDL to use")
 set(CY_PSOC6PDL_LIB_PATCH_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/cypress/psoc64/libs/psoc6pdl"
     CACHE PATH   "Path to folder with PSOC6PDL patches. Set empty string to skip patching.")
 

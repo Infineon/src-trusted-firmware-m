@@ -25,6 +25,10 @@ for an additional description of the TF-M software.
 
 ## Changelog
 
+### v1.3.120
+* Updated TF-M ModusToolbox library to support the non-secure image build in ModusToolbox 3.2
+* Updated to use PDL v3.9.0
+
 ### v1.3.110
 * Added GCC11 support
 * Fixed build of p64_utils for non-secure image with cmake (non ModusToolbox)
@@ -103,23 +107,23 @@ This version of TF-M was validated for compatibility with the following Software
 
 | Software and Tools                                                            | Version       |
 | :---                                                                          | :----         |
-| ModusToolbox Software Environment                                             | 2.4.0         |
-| GCC Compiler                                                                  | 9.3.1         |
-| ARM Compiler 6                                                                | 6.13          |
-| IAR C/C++ compiler                                                            | 8.42.1        |
-| CMake                                                                         | 3.15          |
-| CMSIS-Core(M)                                                                 | 5.5.0         |
+| ModusToolbox Software Environment                                             | 3.2.0         |
+| GCC Compiler                                                                  | 11.3.1        |
+| ARM Compiler 6                                                                | 6.16          |
+| IAR C/C++ compiler                                                            | 9.30.1        |
+| CMake                                                                         | 3.22.2        |
+| CMSIS-Core(M)                                                                 | 5.8.0         |
 | MbedTLS                                                                       | 2.25.0        |
 | PSoC6 MCUs acceleration for mbedTLS library                                   | 1.3.0         |
 | PSoC64 Secure Boot Utilities Middleware Library                               | 1.0.1         |
-| PSoC 6 Peripheral Driver Library (PDL)                                        | 3.0.0         |
-| CY8CKIT-064S0S2-4343W Board Support Package (BSP)                             | 3.0.0         |
-| CY8CKIT-064B0S2-4343W Board Support Package (BSP)                             | 3.0.0         |
-| Core Library                                                                  | 1.3.0         |
+| PSoC 6 Peripheral Driver Library (PDL)                                        | 3.9.0         |
+| CY8CKIT-064S0S2-4343W Board Support Package (BSP)                             | 4.2.0         |
+| CY8CKIT-064B0S2-4343W Board Support Package (BSP)                             | 4.2.0         |
+| Core Library                                                                  | 1.4.1         |
 | RTOS Abstraction                                                              | 1.4.0         |
 | CySecureTools                                                                 | 4.1.0         |
 
-Minimum required ModusToolbox Software Environment: v2.4.0
+Minimum required ModusToolbox Software Environment: v3.0.0
 
 ## More information
 Use the following links for more information, as needed:
@@ -133,4 +137,4 @@ Use the following links for more information, as needed:
 * [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software)
 
 ---
-*© Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
+*© Copyright (c) 2020-2024 Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

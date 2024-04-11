@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2019-2024 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,24 +37,30 @@ struct ppu_resources {
     union ppu_t {
         PERI_MS_PPU_PR_Type *ms_ppu_pr;
         PERI_MS_PPU_FX_Type *ms_ppu_fx;
+#if defined(CY_IP_M4CPUSS) && CY_IP_MXPERI_VERSION == 1U
         PERI_PPU_PR_Type *ppu_pr;
         PERI_PPU_GR_Type *ppu_gr;
         PERI_GR_PPU_SL_Type *gr_ppu_sl;
         PERI_GR_PPU_RG_Type *gr_ppu_rg;
+#endif /* defined(CY_IP_M4CPUSS) && CY_IP_MXPERI_VERSION == 1U */
     } ppu;
     union master_config_t {
         struct ms_ppu_config ms_ppu;
+#if defined(CY_IP_M4CPUSS) && CY_IP_MXPERI_VERSION == 1U
         cy_stc_ppu_prog_cfg_t ppu_pr;
         cy_stc_ppu_gr_cfg_t ppu_gr;
         cy_stc_ppu_sl_cfg_t gr_ppu_sl;
         cy_stc_ppu_rg_cfg_t gr_ppu_rg;
+#endif /* defined(CY_IP_M4CPUSS) && CY_IP_MXPERI_VERSION == 1U */
     } master_cfg;
     union slave_config_t {
         struct ms_ppu_config ms_ppu;
+#if defined(CY_IP_M4CPUSS) && CY_IP_MXPERI_VERSION == 1U
         cy_stc_ppu_prog_cfg_t ppu_pr;
         cy_stc_ppu_gr_cfg_t ppu_gr;
         cy_stc_ppu_sl_cfg_t gr_ppu_sl;
         cy_stc_ppu_rg_cfg_t gr_ppu_rg;
+#endif /* defined(CY_IP_M4CPUSS) && CY_IP_MXPERI_VERSION == 1U */
     } slave_cfg;
     /* These are only applicable when ppu_type is MS_PPU_PR */
     uint32_t slave_address;
